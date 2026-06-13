@@ -14,10 +14,10 @@
 ## 🔭 Current status
 
 - **Phase:** `Phase 0 — Foundation` (in progress)
-- **Next up:** **Adaptivity Engine** — types + all config objects (tiers, maturity,
-  data-readiness; archetypes already in CLAUDE.md), `resolveCapabilities()` +
-  unit tests. This gates all feature work.
-- **Last working commit:** `ec46872` — RLS + tenant-scoped helper + RBAC.
+- **Next up:** **Onboarding wizard** — produce a Context Profile from ≤5 selections
+  (consumes `withProfileDefaults` + `resolveCapabilities`), persist on
+  `Workspace.profile`. Last Phase 0 item before Phase 1 (the Spine).
+- **Last working commit:** `__ENGINE_HASH__` — Adaptivity Engine (resolver + config + tests).
 - **Live URL (Vercel):** _not deployed yet_
 - **Blockers:** _none_
 
@@ -53,10 +53,10 @@ Track readiness. Tick when done; note where the credential lives (e.g. `.env.loc
 - [x] Supabase auth wired (sign-in, session) — email/password + proxy session refresh
 - [x] Tenant + Membership models + **Postgres RLS** policies (enforced via dedicated `stratiq_app` role)
 - [x] Tenant-scoped DB helper + RBAC guard at the API boundary (`forTenant`/`withTenant`, `lib/auth/rbac.ts`)
-- [ ] **Adaptivity Engine:** types + all config objects (archetypes ✓ in CLAUDE.md, plus tiers/maturity/data-readiness)
-- [ ] `resolveCapabilities()` implemented + **unit tests passing** (this gates all feature work)
+- [x] **Adaptivity Engine:** types + all config objects (archetypes, tiers, maturity, data-readiness) in `lib/adaptivity/`
+- [x] `resolveCapabilities()` implemented + **unit tests passing** (pure, deterministic; gates feature work)
 - [ ] Onboarding wizard → produces a Context Profile from ≤5 selections
-- [ ] **Checkpoint:** two contrasting profiles resolve to visibly different capabilities
+- [x] **Checkpoint:** two contrasting profiles resolve to visibly different capabilities (`tests/adaptivity/resolveCapabilities.test.ts`)
 
 ### Phase 1 — The Spine (the demo-able MVP)
 - [ ] M1 Category Workspace & Governance (taxonomy, team, profile, version control)
@@ -105,6 +105,9 @@ Record every meaningful choice so it never gets re-litigated mid-build.
 | 2026-06-13 | RLS via idempotent `npm run db:setup-rls` (role+grants+policies), not a Prisma migration | Prisma doesn't manage roles/grants/policies; script auto-discovers `public` tables with `tenant_id` so new tables get RLS on re-run |
 | 2026-06-13 | Tenant scoping = Prisma `$extends` (`forTenant`): injects tenant into where/data **and** wraps each op in a `set_config('app.tenant_id')` tx | Two enforced layers (app + RLS). `create` overwrites any foreign tenantId — can't write cross-tenant |
 | 2026-06-13 | Test runner = **Vitest** (loads `.env.local`); admin client (`lib/db/admin.ts`, `postgres`) for seeds/system lookups | Needed now + for the Adaptivity Engine; admin client bypasses RLS for cross-tenant resolution only |
+| 2026-06-13 | Adaptivity dimension→capability mapping: tier→modules/roles/approval/SSO; archetype→fields/sources/levers/KPIs; maturity→frameworks/options/evidence; dataReadiness→integrationMode | Directly from CLAUDE.md §2.1 control table |
+| 2026-06-13 | Blends: `integrationMode` clamped to tier cap (SMALL/MID=FILES, ENT=CONNECTED); `uiDensity` FOUNDATIONAL→GUIDED/ADVANCED→EXPERT else tier default; terminology = tier base + archetype item-noun overlay | Resolve overlaps between dimensions deterministically |
+| 2026-06-13 | `Capabilities` adds `sso`/`scim` beyond §2.2 sketch; label maps are `Record<Id,string>` (compile-time completeness); engine imports only Prisma `Role` **type** | Clean SMALL-no-SSO gate; TS enforces every enum value has a label; keeps engine pure |
 
 ---
 
@@ -120,6 +123,24 @@ Record every meaningful choice so it never gets re-litigated mid-build.
 ## 🗒️ Session log
 
 Newest at the top. One short entry per working session.
+
+### Session 4 — 2026-06-13
+- **Goal:** Build the Adaptivity Engine (CLAUDE.md §2) — the pure resolver that
+  gates all feature work.
+- **Done:** `lib/adaptivity/`: `types.ts` (ContextProfile, Capabilities, all id/
+  spec types), `config/` (archetypes verbatim from §2.3; orgTiers; maturity;
+  dataReadiness; fields registry; labels as `Record<Id,string>`; terminology),
+  `resolveCapabilities.ts` (pure/deterministic; deep-copies output) +
+  `withProfileDefaults`, and `index.ts` barrel. Tests in `tests/adaptivity/`:
+  `resolveCapabilities.test.ts` (determinism, §2.4 contrast, SMALL invariants,
+  integration clamp, density blend, defaults) and `config.test.ts` (integrity).
+  **34 tests passing** (15 prior + 19 new). Build + lint + `tsc --noEmit` clean;
+  grep confirms no db/next/auth imports (pure). Commit `__ENGINE_HASH__`, pushed.
+- **Next up:** Onboarding wizard (Context Profile from ≤5 selections), then Phase 1.
+- **Notes:** Engine reuses the Prisma `Role` **type** only. `Capabilities` adds
+  `sso`/`scim` beyond the §2.2 sketch. The §2.4 acceptance criterion is proven by
+  the contrast test. `CategoryArchetype`/`Maturity`/`DataReadiness` are TS unions
+  here; add matching Prisma enums when persisting profiles in the wizard task.
 
 ### Session 3 — 2026-06-13
 - **Goal:** Multi-tenancy security — Postgres RLS + tenant-scoped DB helper + RBAC
