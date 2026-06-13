@@ -29,7 +29,7 @@ export default function Home() {
           </p>
         </CardContent>
         <CardFooter className="gap-3">
-          <Button>Get started</Button>
+          <Button render={<a href="/login" />}>Sign in</Button>
           <Button
             variant="outline"
             render={

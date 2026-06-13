@@ -1,0 +1,91 @@
+// StratIQ Prisma schema.
+// See CLAUDE.md §6 for the full target data model. This first migration lays
+// down the foundational identity + tenancy tables only; domain entities
+// (EvidenceCard, SpendLine, StrategyOption, ...) and Postgres RLS policies
+// arrive in their own tasks.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  // Pooled connection (pgbouncer) for the app at runtime.
+  url       = env("DATABASE_URL")
+  // Direct connection (port 5432) for migrations / introspection.
+  directUrl = env("DIRECT_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum OrgTier {
+  SMALL
+  MID
+  ENTERPRISE
+}
+
+// Superset covering the SMALL collapsed set (OWNER/MEMBER/VIEWER) and the full
+// enterprise role matrix (CLAUDE.md §5). The Adaptivity Engine decides which of
+// these are actually exposed per profile.
+enum Role {
+  OWNER
+  MEMBER
+  VIEWER
+  TENANT_ADMIN
+  CPO
+  CATEGORY_MANAGER
+  ANALYST
+  FINANCE_APPROVER
+  STAKEHOLDER
+  LEGAL_COMPLIANCE
+  SUPPLIER_USER
+}
+
+// ---------------------------------------------------------------------------
+// Identity & tenancy (foundation)
+// ---------------------------------------------------------------------------
+
+model Tenant {
+  id        String   @id @default(cuid())
+  name      String
+  orgTier   OrgTier  @default(SMALL)
+  createdAt DateTime @default(now())
+
+  users       User[]
+  memberships Membership[]
+
+  @@map("tenants")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  tenantId  String   @map("tenant_id")
+  // Supabase auth user id (auth.users.id). Links the app user to the auth user.
+  authUserId String? @unique @map("auth_user_id")
+  email     String
+  name      String?
+  createdAt DateTime @default(now())
+
+  tenant      Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  memberships Membership[]
+
+  @@unique([tenantId, email])
+  @@index([tenantId])
+  @@map("users")
+}
+
+model Membership {
+  id       String @id @default(cuid())
+  tenantId String @map("tenant_id")
+  userId   String @map("user_id")
+  role     Role   @default(MEMBER)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, userId])
+  @@index([tenantId])
+  @@map("memberships")
+}

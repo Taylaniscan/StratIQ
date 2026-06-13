@@ -14,8 +14,9 @@
 ## 🔭 Current status
 
 - **Phase:** `Phase 0 — Foundation` (in progress)
-- **Next up:** Prisma + Postgres connected; first migration runs.
-- **Last working commit:** `a7a88ec` — Phase 0 Task 1 scaffold (Next.js + Tailwind + shadcn).
+- **Next up:** Postgres RLS policies + tenant-scoped DB helper + RBAC guard
+  (Tenant/User/Membership models already migrated), then the Adaptivity Engine.
+- **Last working commit:** `__FOUNDATION_HASH__` — Prisma + Supabase auth wired.
 - **Live URL (Vercel):** _not deployed yet_
 - **Blockers:** _none_
 
@@ -47,9 +48,9 @@ Track readiness. Tick when done; note where the credential lives (e.g. `.env.loc
 ### Phase 0 — Foundation (do fully before any feature)
 - [x] Scaffold Next.js (App Router) + TypeScript + Tailwind + shadcn/ui
 - [x] App runs locally and is pushed to GitHub
-- [ ] Prisma + Postgres connected; first migration runs
-- [ ] Supabase auth wired (sign-in, session)
-- [ ] Tenant + Membership models + **Postgres RLS** policies
+- [x] Prisma + Postgres connected; first migration runs (`init`: tenants/users/memberships)
+- [x] Supabase auth wired (sign-in, session) — email/password + proxy session refresh
+- [ ] Tenant + Membership models + **Postgres RLS** policies (models ✓ migrated; RLS pending)
 - [ ] Tenant-scoped DB helper + RBAC guard at the API boundary
 - [ ] **Adaptivity Engine:** types + all config objects (archetypes ✓ in CLAUDE.md, plus tiers/maturity/data-readiness)
 - [ ] `resolveCapabilities()` implemented + **unit tests passing** (this gates all feature work)
@@ -95,6 +96,10 @@ Record every meaningful choice so it never gets re-litigated mid-build.
 | 2026-06-13 | Package manager: **npm**; no `src/` dir (app/lib/components at repo root per §4) | Node 20/npm present; matches CLAUDE.md §4 structure |
 | 2026-06-13 | shadcn/ui installed via the **Base UI** registry (Tailwind v4); `Button` uses `render` prop, not `asChild` | Current shadcn default; note for all future components |
 | 2026-06-13 | Renamed `env.local` → `.env.local`; added committed `.env.example` | `.env.local` now gitignored + auto-loaded by Next; secrets never tracked |
+| 2026-06-13 | **Prisma 6** (not 7) | Prisma 7's config-based datasource drops `directUrl`; Supabase needs pooled `url` (6543) + `directUrl` (5432). v6 supports both via `env()` in schema + standard `@prisma/client` import. Revisit v7 later. |
+| 2026-06-13 | Prisma CLI loads env via `dotenv-cli` (`db:*` scripts use `-e .env.local`) | Prisma reads `.env`, not `.env.local`; runtime (Next) loads `.env.local` itself |
+| 2026-06-13 | DB password percent-encoded in `.env.local` | Raw password contained `?`/`!`, breaking URL parsing (P1013); encoded so Prisma parses host/port |
+| 2026-06-13 | Auth = Supabase email/password via `@supabase/ssr`; session refresh in `proxy.ts` | Next 16 renamed `middleware`→`proxy`; SSR cookie pattern guards routes server-side |
 
 ---
 
@@ -110,6 +115,28 @@ Record every meaningful choice so it never gets re-litigated mid-build.
 ## 🗒️ Session log
 
 Newest at the top. One short entry per working session.
+
+### Session 2 — 2026-06-13
+- **Goal:** Wire up Prisma + Postgres and Supabase auth on the scaffold; run
+  locally; stop for verification.
+- **Done:** Installed Prisma 6 + `@supabase/ssr` + `dotenv-cli`. Wrote
+  `prisma/schema.prisma` (datasource: pooled `DATABASE_URL` + `directUrl`
+  `DIRECT_URL`; enums `OrgTier`/`Role`; models `Tenant`/`User`/`Membership`).
+  First migration `init` applied to Supabase (direct 5432); pooled (6543) runtime
+  connection verified via Prisma (`tenant.count() = 0`). Prisma client singleton
+  at `lib/db/prisma.ts`. Supabase SSR clients (`lib/auth/supabase/{server,client,middleware}.ts`),
+  session refresh + route guard in `proxy.ts`, `/login` (email+password,
+  sign-in/sign-up server actions), protected `/dashboard` (shows user, sign out).
+  `.env.local` DB password percent-encoded to fix P1013. Build + lint clean; dev
+  smoke: `/` 200, `/login` 200, `/dashboard` → 307 → `/login`. Commit
+  `__FOUNDATION_HASH__`, pushed to `origin/main`.
+- **Next up:** Postgres RLS policies + tenant-scoped DB helper + RBAC guard, then
+  the Adaptivity Engine.
+- **Notes:** Full sign-in round-trip depends on the Supabase project's
+  email-confirmation setting (user to verify). Tenant/User/Membership models were
+  created now (needed a first migration) but **RLS is NOT yet applied** — do that
+  before any real multi-tenant data. Staying on Prisma 6 deliberately (see
+  decision log). To run: `npm run dev` → http://localhost:3000.
 
 ### Session 1 — 2026-06-13
 - **Goal:** Phase 0, Task 1 — project scaffold.
