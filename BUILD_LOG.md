@@ -16,7 +16,7 @@
 - **Phase:** `Phase 1 — The Spine` (in progress)
 - **Next up:** **M4 Market & Supplier Intelligence Hub + EvidenceCard system** —
   supplier universe, archetype intelligence sources, and the evidence/trust spine.
-- **Last working commit:** `__M3_HASH__` — M3 Requirements & Demand Intelligence.
+- **Last working commit:** `8a01d5f` — M3 Requirements & Demand Intelligence.
 - **Live URL (Vercel):** _not deployed yet_
 - **Blockers:** _none_
 
@@ -145,7 +145,7 @@ Newest at the top. One short entry per working session.
   renderer (text/textarea/number/currency/date/select/multiselect/boolean) +
   `RequirementSummary`. Nav M3 → built. Tests: persist/reload, ungated-field
   rejection, single-artifact update, tenant isolation — **57 passing**. build +
-  lint + tsc clean. Commit `__M3_HASH__`, pushed.
+  lint + tsc clean. Commit `8a01d5f`, pushed.
 - **Next up:** M4 Market & Supplier Intelligence Hub + EvidenceCard system.
 - **Notes:** The intake form is generated entirely from the engine — DIRECT_MATERIAL
   shows BOM/spec/tolerance, INDIRECT_SERVICE shows SOW/SLA/rate-card, same code.
