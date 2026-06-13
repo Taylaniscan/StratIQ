@@ -14,9 +14,9 @@
 ## 🔭 Current status
 
 - **Phase:** `Phase 1 — The Spine` (in progress)
-- **Next up:** **M2 Spend & Contract Data Fabric** — CSV/Excel spend import + spend
-  cube (the `data` tab in the workspace shell).
-- **Last working commit:** `e34bd6a` — M1 Category Workspace & Governance.
+- **Next up:** **M3 Requirements & Demand Intelligence** — archetype-shaped intake
+  fields (driven by `Capabilities.requirementFields`) + demand basis.
+- **Last working commit:** `__M2_HASH__` — M2 Spend & Contract Data Fabric.
 - **Live URL (Vercel):** _not deployed yet_
 - **Blockers:** _none_
 
@@ -59,7 +59,7 @@ Track readiness. Tick when done; note where the credential lives (e.g. `.env.loc
 
 ### Phase 1 — The Spine (the demo-able MVP)
 - [x] M1 Category Workspace & Governance — shell (Capabilities-gated nav), overview (taxonomy/objective/status edit), governance (members, approval chain, append-only audit). _Deferred: version snapshots, objective tree, RACI/council editing, invites._
-- [ ] M2 Spend & Contract Data Fabric — file (CSV/Excel) import + spend cube
+- [x] M2 Spend & Contract Data Fabric — CSV/Excel import + spend cube (by supplier/BU/site/month) + per-dataset quality + sample loader. _Deferred: AI classification, maverick/contract variance (needs M8), connectors, column-mapping UI._
 - [ ] M3 Requirements & Demand Intelligence (archetype-shaped intake fields)
 - [ ] M4 Market & Supplier Intelligence Hub + **EvidenceCard** system
 - [ ] M5 Positioning & Segmentation Studio (Kraljic always; others maturity-gated)
@@ -114,6 +114,9 @@ Record every meaningful choice so it never gets re-litigated mid-build.
 | 2026-06-13 | Workspace routes keyed by Workspace **id** (`app/(app)/[workspace]/…`); loaded via `forTenant` → `notFound()` cross-tenant | Tenant isolation enforced at the route by RLS; no slug uniqueness needed |
 | 2026-06-13 | Workspace shell nav is **Capabilities-gated**; unbuilt modules show disabled "Soon" | Spine lights up by adding routes; no code change to gate visibility (§2.2) |
 | 2026-06-13 | `audit_logs` append-only via `REVOKE UPDATE,DELETE` from app role in `db:setup-rls` | §5 immutable audit; enforced at DB, not just app code |
+| 2026-06-13 | Charts = **Recharts** (not Tremor) | Tremor npm lags Tailwind v4; Recharts is CSS-agnostic and in the stack |
+| 2026-06-13 | Spend cube aggregated **in JS** from a tenant-scoped `findMany`, not raw SQL | `$queryRaw` via `forTenant` bypasses the `set_config` wrapper → RLS would return nothing; model methods are RLS-safe. Fine at v1 scale |
+| 2026-06-13 | tsconfig `target` ES2017 → **ES2020** | Needed for `bigint` literals (money in minor units) |
 
 ---
 
@@ -129,6 +132,24 @@ Record every meaningful choice so it never gets re-litigated mid-build.
 ## 🗒️ Session log
 
 Newest at the top. One short entry per working session.
+
+### Session 7 — 2026-06-13
+- **Goal:** M2 Spend & Contract Data Fabric — file import + spend cube.
+- **Done:** Schema: `Confidence` + `DataQuality` enums; `Supplier`, `SpendDataset`,
+  `SpendLine` models (migration `m2_spend_fabric`); RLS auto-applied. Deps: xlsx,
+  papaparse, recharts. `lib/domain/money.ts` (bigint minor units),
+  `lib/domain/spend/{parse,ingest,cube,sample}.ts` (CSV/Excel tolerant parse,
+  supplier upsert + dataset quality, JS aggregation by supplier/BU/site/month).
+  Route `app/(app)/[workspace]/data/` (page + actions: `uploadSpend`,
+  `loadSampleSpend`; M2-gated + RBAC `workspace:write`). Components in
+  `components/spend/` (UploadForm, SpendCharts/Recharts, DatasetTable,
+  DataQualityBadge); nav M2 → built. tsconfig target → ES2020 (bigint literals).
+  Tests: money + parse + ingest/cube isolation — **53 passing**. build + lint +
+  tsc clean. Commit `__M2_HASH__`, pushed.
+- **Next up:** M3 Requirements & Demand Intelligence (archetype-shaped intake).
+- **Notes:** M2 only shows for profiles whose `enabledModules` include M2
+  (MID/ENTERPRISE) — SMALL workspaces 404 the `data` route. "Load sample data"
+  seeds 40 demo lines so the cube is never empty.
 
 ### Session 6 — 2026-06-13
 - **Goal:** M1 Category Workspace & Governance — the Spine's workspace shell + governance.

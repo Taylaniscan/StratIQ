@@ -52,6 +52,20 @@ enum WorkspaceStatus {
   REFRESH
 }
 
+enum Confidence {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum DataQuality {
+  COMPLETE
+  PARTIAL
+  STALE
+  ESTIMATED
+  BLOCKED
+}
+
 // ---------------------------------------------------------------------------
 // Identity & tenancy (foundation)
 // ---------------------------------------------------------------------------
@@ -65,6 +79,7 @@ model Tenant {
   users       User[]
   memberships Membership[]
   workspaces  Workspace[]
+  suppliers   Supplier[]
 
   @@map("tenants")
 }
@@ -119,7 +134,9 @@ model Workspace {
   createdAt  DateTime        @default(now())
   updatedAt  DateTime        @updatedAt
 
-  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant        Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  spendDatasets SpendDataset[]
+  spendLines    SpendLine[]
 
   @@index([tenantId])
   @@map("workspaces")
@@ -143,4 +160,75 @@ model AuditLog {
   @@index([tenantId])
   @@index([tenantId, entity, entityId])
   @@map("audit_logs")
+}
+
+// ---------------------------------------------------------------------------
+// Spend & Contract Data Fabric (M2)
+// ---------------------------------------------------------------------------
+
+model Supplier {
+  id          String   @id @default(cuid())
+  tenantId    String   @map("tenant_id")
+  name        String
+  isIncumbent Boolean  @default(false) @map("is_incumbent")
+  tier        String?
+  riskProfile Json?    @map("risk_profile")
+  esgProfile  Json?    @map("esg_profile")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  tenant     Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  spendLines SpendLine[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId])
+  @@map("suppliers")
+}
+
+model SpendDataset {
+  id            String      @id @default(cuid())
+  tenantId      String      @map("tenant_id")
+  workspaceId   String      @map("workspace_id")
+  filename      String
+  status        DataQuality @default(COMPLETE)
+  rowCount      Int         @default(0) @map("row_count")
+  errorCount    Int         @default(0) @map("error_count")
+  totalMinor    BigInt      @default(0) @map("total_minor")
+  currency      String?
+  periodStart   DateTime?   @map("period_start")
+  periodEnd     DateTime?   @map("period_end")
+  uploadedById  String      @map("uploaded_by_id")
+  createdAt     DateTime    @default(now()) @map("created_at")
+
+  workspace  Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  spendLines SpendLine[]
+
+  @@index([tenantId])
+  @@index([workspaceId])
+  @@map("spend_datasets")
+}
+
+model SpendLine {
+  id                       String      @id @default(cuid())
+  tenantId                 String      @map("tenant_id")
+  workspaceId              String      @map("workspace_id")
+  datasetId                String      @map("dataset_id")
+  supplierId               String?     @map("supplier_id")
+  buUnit                   String?     @map("bu_unit")
+  site                     String?
+  glDate                   DateTime    @map("gl_date")
+  amountMinor              BigInt      @map("amount_minor")
+  currency                 String
+  classification           String?
+  classificationConfidence Confidence? @map("classification_confidence")
+  contractId               String?     @map("contract_id")
+  isMaverick               Boolean     @default(false) @map("is_maverick")
+
+  workspace Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  dataset   SpendDataset @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  supplier  Supplier?    @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([workspaceId])
+  @@index([datasetId])
+  @@map("spend_lines")
 }
