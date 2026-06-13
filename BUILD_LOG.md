@@ -14,9 +14,10 @@
 ## 🔭 Current status
 
 - **Phase:** `Phase 0 — Foundation` (in progress)
-- **Next up:** Postgres RLS policies + tenant-scoped DB helper + RBAC guard
-  (Tenant/User/Membership models already migrated), then the Adaptivity Engine.
-- **Last working commit:** `32f8ca4` — Prisma + Supabase auth wired.
+- **Next up:** **Adaptivity Engine** — types + all config objects (tiers, maturity,
+  data-readiness; archetypes already in CLAUDE.md), `resolveCapabilities()` +
+  unit tests. This gates all feature work.
+- **Last working commit:** `__SECURITY_HASH__` — RLS + tenant-scoped helper + RBAC.
 - **Live URL (Vercel):** _not deployed yet_
 - **Blockers:** _none_
 
@@ -50,8 +51,8 @@ Track readiness. Tick when done; note where the credential lives (e.g. `.env.loc
 - [x] App runs locally and is pushed to GitHub
 - [x] Prisma + Postgres connected; first migration runs (`init`: tenants/users/memberships)
 - [x] Supabase auth wired (sign-in, session) — email/password + proxy session refresh
-- [ ] Tenant + Membership models + **Postgres RLS** policies (models ✓ migrated; RLS pending)
-- [ ] Tenant-scoped DB helper + RBAC guard at the API boundary
+- [x] Tenant + Membership models + **Postgres RLS** policies (enforced via dedicated `stratiq_app` role)
+- [x] Tenant-scoped DB helper + RBAC guard at the API boundary (`forTenant`/`withTenant`, `lib/auth/rbac.ts`)
 - [ ] **Adaptivity Engine:** types + all config objects (archetypes ✓ in CLAUDE.md, plus tiers/maturity/data-readiness)
 - [ ] `resolveCapabilities()` implemented + **unit tests passing** (this gates all feature work)
 - [ ] Onboarding wizard → produces a Context Profile from ≤5 selections
@@ -100,12 +101,16 @@ Record every meaningful choice so it never gets re-litigated mid-build.
 | 2026-06-13 | Prisma CLI loads env via `dotenv-cli` (`db:*` scripts use `-e .env.local`) | Prisma reads `.env`, not `.env.local`; runtime (Next) loads `.env.local` itself |
 | 2026-06-13 | DB password percent-encoded in `.env.local` | Raw password contained `?`/`!`, breaking URL parsing (P1013); encoded so Prisma parses host/port |
 | 2026-06-13 | Auth = Supabase email/password via `@supabase/ssr`; session refresh in `proxy.ts` | Next 16 renamed `middleware`→`proxy`; SSR cookie pattern guards routes server-side |
+| 2026-06-13 | **Dedicated `stratiq_app` DB role** (NOBYPASSRLS) for runtime; `postgres` only for migrations/admin | Supabase `postgres` has BYPASSRLS + owns tables → RLS never bites for it. Runtime `DATABASE_URL` now uses `stratiq_app` (pooled :6543); RLS verified enforced (0 rows w/o `set_config`). |
+| 2026-06-13 | RLS via idempotent `npm run db:setup-rls` (role+grants+policies), not a Prisma migration | Prisma doesn't manage roles/grants/policies; script auto-discovers `public` tables with `tenant_id` so new tables get RLS on re-run |
+| 2026-06-13 | Tenant scoping = Prisma `$extends` (`forTenant`): injects tenant into where/data **and** wraps each op in a `set_config('app.tenant_id')` tx | Two enforced layers (app + RLS). `create` overwrites any foreign tenantId — can't write cross-tenant |
+| 2026-06-13 | Test runner = **Vitest** (loads `.env.local`); admin client (`lib/db/admin.ts`, `postgres`) for seeds/system lookups | Needed now + for the Adaptivity Engine; admin client bypasses RLS for cross-tenant resolution only |
 
 ---
 
 ## ⚠️ Known issues / risks to watch
 
-- [ ] Multi-tenant data isolation — verify with a cross-tenant access test early
+- [x] Multi-tenant data isolation — cross-tenant access test passing (`tests/tenant-isolation.test.ts`: app-layer + RLS enforcement)
 - [ ] AI cost — confirm spend limit is active before turning on real synthesis
 - [ ] Adaptivity drift — no screen may read the raw profile; only `Capabilities`
 - [ ] Evidence grounding — confirm unknown citation IDs are stripped, never rendered
@@ -115,6 +120,30 @@ Record every meaningful choice so it never gets re-litigated mid-build.
 ## 🗒️ Session log
 
 Newest at the top. One short entry per working session.
+
+### Session 3 — 2026-06-13
+- **Goal:** Multi-tenancy security — Postgres RLS + tenant-scoped DB helper + RBAC
+  guard, with a cross-tenant isolation test.
+- **Done:** Found Prisma connected as `postgres` (BYPASSRLS) → RLS inert. Added a
+  dedicated `stratiq_app` role (LOGIN, NOBYPASSRLS) via idempotent
+  `scripts/db/setup-rls.mjs` (`npm run db:setup-rls`): role + grants + default
+  privileges + RLS enable/FORCE + `tenant_isolation` policy on every `public`
+  table with `tenant_id` (and `tenants` by `id`). Switched runtime `DATABASE_URL`
+  to `stratiq_app` (pooled :6543); `DIRECT_URL` stays `postgres`. Verified the app
+  role connects through the pooler and RLS enforces (0 rows without `set_config`).
+  Built `lib/db/admin.ts` (privileged client), `lib/db/tenant.ts`
+  (`forTenant`/`withTenant` extension: where/data injection + `set_config` tx),
+  `lib/auth/session.ts`, `lib/auth/rbac.ts`. Added Vitest (`vitest.config.ts`,
+  `test`/`test:run`). Tests: `tenant-isolation.test.ts` (app-layer + RLS, incl.
+  create-overwrite + "no set_config ⇒ 0 rows") and `rbac.test.ts` — **15 passing**.
+  Build + lint + `tsc --noEmit` clean. `.env.example` documents the two roles.
+  Commit `__SECURITY_HASH__`, pushed.
+- **Next up:** Adaptivity Engine (types + config + `resolveCapabilities` + unit tests).
+- **Notes:** `forTenant().create()` still requires `tenantId` statically (Prisma
+  types don't know the extension injects it) — callers pass it; the extension
+  overwrites to the active tenant as a safety net. Onboarding (auth-user →
+  Tenant/Membership) is still pending, so the live dashboard shows the auth user
+  only. Re-run `npm run db:setup-rls` after adding any new tenant-scoped table.
 
 ### Session 2 — 2026-06-13
 - **Goal:** Wire up Prisma + Postgres and Supabase auth on the scaffold; run
