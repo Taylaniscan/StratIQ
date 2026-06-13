@@ -17,7 +17,7 @@
 - **Next up:** **Adaptivity Engine** — types + all config objects (tiers, maturity,
   data-readiness; archetypes already in CLAUDE.md), `resolveCapabilities()` +
   unit tests. This gates all feature work.
-- **Last working commit:** `__SECURITY_HASH__` — RLS + tenant-scoped helper + RBAC.
+- **Last working commit:** `ec46872` — RLS + tenant-scoped helper + RBAC.
 - **Live URL (Vercel):** _not deployed yet_
 - **Blockers:** _none_
 
@@ -137,7 +137,7 @@ Newest at the top. One short entry per working session.
   `test`/`test:run`). Tests: `tenant-isolation.test.ts` (app-layer + RLS, incl.
   create-overwrite + "no set_config ⇒ 0 rows") and `rbac.test.ts` — **15 passing**.
   Build + lint + `tsc --noEmit` clean. `.env.example` documents the two roles.
-  Commit `__SECURITY_HASH__`, pushed.
+  Commit `ec46872`, pushed.
 - **Next up:** Adaptivity Engine (types + config + `resolveCapabilities` + unit tests).
 - **Notes:** `forTenant().create()` still requires `tenantId` statically (Prisma
   types don't know the extension injects it) — callers pass it; the extension
