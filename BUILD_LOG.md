@@ -16,7 +16,7 @@
 - **Phase:** `Phase 1 — The Spine` (in progress)
 - **Next up:** **M3 Requirements & Demand Intelligence** — archetype-shaped intake
   fields (driven by `Capabilities.requirementFields`) + demand basis.
-- **Last working commit:** `__M2_HASH__` — M2 Spend & Contract Data Fabric.
+- **Last working commit:** `7427bc6` — M2 Spend & Contract Data Fabric.
 - **Live URL (Vercel):** _not deployed yet_
 - **Blockers:** _none_
 
@@ -145,7 +145,7 @@ Newest at the top. One short entry per working session.
   `components/spend/` (UploadForm, SpendCharts/Recharts, DatasetTable,
   DataQualityBadge); nav M2 → built. tsconfig target → ES2020 (bigint literals).
   Tests: money + parse + ingest/cube isolation — **53 passing**. build + lint +
-  tsc clean. Commit `__M2_HASH__`, pushed.
+  tsc clean. Commit `7427bc6`, pushed.
 - **Next up:** M3 Requirements & Demand Intelligence (archetype-shaped intake).
 - **Notes:** M2 only shows for profiles whose `enabledModules` include M2
   (MID/ENTERPRISE) — SMALL workspaces 404 the `data` route. "Load sample data"
