@@ -48,3 +48,18 @@ export async function getActiveMembership(authUserId: string, tenantId?: string)
   if (tenantId) return memberships.find((m) => m.tenantId === tenantId) ?? null;
   return memberships.length === 1 ? memberships[0] : null;
 }
+
+/**
+ * Require an authenticated user with at least one membership; redirects to
+ * /onboarding if they haven't been provisioned yet. Returns the auth user, the
+ * active membership (the first, single-tenant for now), and its tenant.
+ */
+export async function requireActiveMembership() {
+  const user = await requireAuthUser();
+  const memberships = await getMemberships(user.id);
+  const membership = memberships[0];
+  if (!membership) {
+    redirect("/onboarding");
+  }
+  return { user, membership, tenant: membership.tenant };
+}

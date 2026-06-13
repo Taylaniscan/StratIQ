@@ -105,6 +105,20 @@ async function main() {
     console.log(`RLS enabled + tenant_isolation policy on public.${table} (${col})`);
   }
 
+  // 5. Append-only tables: revoke UPDATE/DELETE from the app role so audit history
+  //    cannot be rewritten (CLAUDE.md §5). Inserts/selects still flow through RLS.
+  const APPEND_ONLY = ["audit_logs"];
+  for (const table of APPEND_ONLY) {
+    const present = await client.query(
+      `select 1 from information_schema.tables where table_schema = 'public' and table_name = $1`,
+      [table],
+    );
+    if (present.rowCount > 0) {
+      await client.query(`REVOKE UPDATE, DELETE ON public.${quoteIdent(table)} FROM ${r}`);
+      console.log(`Append-only: revoked UPDATE/DELETE on public.${table} from ${appRole}`);
+    }
+  }
+
   console.log("\nDone. RLS is enforced for role:", appRole);
 }
 

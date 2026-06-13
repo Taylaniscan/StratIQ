@@ -13,11 +13,10 @@
 
 ## 🔭 Current status
 
-- **Phase:** `Phase 0 — Foundation` ✅ **COMPLETE** → starting `Phase 1 — The Spine`
-- **Next up:** **M1 Category Workspace & Governance** — workspace screens (overview,
-  taxonomy, team/RACI, version control) reading `Capabilities`; first real
-  feature module of the Spine.
-- **Last working commit:** `9e7a9fc` — onboarding wizard + tenant provisioning.
+- **Phase:** `Phase 1 — The Spine` (in progress)
+- **Next up:** **M2 Spend & Contract Data Fabric** — CSV/Excel spend import + spend
+  cube (the `data` tab in the workspace shell).
+- **Last working commit:** `__M1_HASH__` — M1 Category Workspace & Governance.
 - **Live URL (Vercel):** _not deployed yet_
 - **Blockers:** _none_
 
@@ -59,7 +58,7 @@ Track readiness. Tick when done; note where the credential lives (e.g. `.env.loc
 - [x] **Checkpoint:** two contrasting profiles resolve to visibly different capabilities (`tests/adaptivity/resolveCapabilities.test.ts`)
 
 ### Phase 1 — The Spine (the demo-able MVP)
-- [ ] M1 Category Workspace & Governance (taxonomy, team, profile, version control)
+- [x] M1 Category Workspace & Governance — shell (Capabilities-gated nav), overview (taxonomy/objective/status edit), governance (members, approval chain, append-only audit). _Deferred: version snapshots, objective tree, RACI/council editing, invites._
 - [ ] M2 Spend & Contract Data Fabric — file (CSV/Excel) import + spend cube
 - [ ] M3 Requirements & Demand Intelligence (archetype-shaped intake fields)
 - [ ] M4 Market & Supplier Intelligence Hub + **EvidenceCard** system
@@ -112,6 +111,9 @@ Record every meaningful choice so it never gets re-litigated mid-build.
 | 2026-06-13 | Tenant provisioning runs via the **admin client** in one transaction (idempotent on `authUserId`) | Bootstrap must create a Tenant before any tenant context exists — RLS app role can't; only place that creates a Tenant |
 | 2026-06-13 | `db:setup-rls` no longer ALTERs an existing role (CREATE-only) | Supabase `postgres` can CREATE roles but not ALTER their attributes/password; keeps the script idempotent. Rotate password by drop+recreate |
 | 2026-06-13 | DB-based redirects in page server components, not `proxy.ts`; added `zod` for the server-boundary schema | Proxy runs on the edge (no Prisma); wizard uses tap-cards + live `resolveCapabilities` preview, RHF deferred |
+| 2026-06-13 | Workspace routes keyed by Workspace **id** (`app/(app)/[workspace]/…`); loaded via `forTenant` → `notFound()` cross-tenant | Tenant isolation enforced at the route by RLS; no slug uniqueness needed |
+| 2026-06-13 | Workspace shell nav is **Capabilities-gated**; unbuilt modules show disabled "Soon" | Spine lights up by adding routes; no code change to gate visibility (§2.2) |
+| 2026-06-13 | `audit_logs` append-only via `REVOKE UPDATE,DELETE` from app role in `db:setup-rls` | §5 immutable audit; enforced at DB, not just app code |
 
 ---
 
@@ -127,6 +129,25 @@ Record every meaningful choice so it never gets re-litigated mid-build.
 ## 🗒️ Session log
 
 Newest at the top. One short entry per working session.
+
+### Session 6 — 2026-06-13
+- **Goal:** M1 Category Workspace & Governance — the Spine's workspace shell + governance.
+- **Done:** Schema: `objective` on Workspace + `AuditLog` model (migration
+  `m1_workspace_governance`); `db:setup-rls` now revokes UPDATE/DELETE on
+  `audit_logs` (append-only). Domain: `lib/domain/audit.ts` (`recordAudit`),
+  `lib/domain/workspace.ts` (list/get/update + `governancePatchSchema`,
+  members + audit queries — all via `forTenant`). `requireActiveMembership` in
+  session. Routes: `app/(app)/[workspace]/` shell `layout` (Capabilities-gated
+  `WorkspaceNav`), `overview` (governance edit form, RBAC-gated, + capabilities
+  card), `governance` (members/RACI, approval chain, activity log), `actions.ts`
+  (`updateGovernance`). Dashboard → tenant home listing workspaces. Components in
+  `components/workspace/` + shadcn badge/textarea/select/separator. Tests:
+  `tests/workspace.test.ts` (tenant isolation, update+audit, append-only reject) —
+  **46 passing**. build + lint + tsc clean.
+  Commit `__M1_HASH__`, pushed.
+- **Next up:** M2 Spend & Contract Data Fabric (CSV/Excel import + spend cube).
+- **Notes:** Workspace addressed by id in the URL; cross-tenant → `notFound` via
+  RLS. Other modules (M2–M12) show as disabled "Soon" in the nav until built.
 
 ### Session 5 — 2026-06-13
 - **Goal:** Onboarding wizard (Context Profile from ≤5 selections) — the Phase 0

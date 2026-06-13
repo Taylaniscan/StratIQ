@@ -108,6 +108,7 @@ model Workspace {
   id         String          @id @default(cuid())
   tenantId   String          @map("tenant_id")
   name       String
+  objective  String?
   taxonomyL1 String          @map("taxonomy_l1")
   taxonomyL2 String?         @map("taxonomy_l2")
   taxonomyL3 String?         @map("taxonomy_l3")
@@ -122,4 +123,24 @@ model Workspace {
 
   @@index([tenantId])
   @@map("workspaces")
+}
+
+// ---------------------------------------------------------------------------
+// Audit log (append-only — see scripts/db/setup-rls.mjs which revokes
+// UPDATE/DELETE for the app role)
+// ---------------------------------------------------------------------------
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  tenantId  String   @map("tenant_id")
+  actorId   String   @map("actor_id")
+  action    String
+  entity    String
+  entityId  String   @map("entity_id")
+  payload   Json?
+  at        DateTime @default(now())
+
+  @@index([tenantId])
+  @@index([tenantId, entity, entityId])
+  @@map("audit_logs")
 }
