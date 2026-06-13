@@ -17,7 +17,7 @@
 - **Next up:** **Onboarding wizard** — produce a Context Profile from ≤5 selections
   (consumes `withProfileDefaults` + `resolveCapabilities`), persist on
   `Workspace.profile`. Last Phase 0 item before Phase 1 (the Spine).
-- **Last working commit:** `__ENGINE_HASH__` — Adaptivity Engine (resolver + config + tests).
+- **Last working commit:** `d66e511` — Adaptivity Engine (resolver + config + tests).
 - **Live URL (Vercel):** _not deployed yet_
 - **Blockers:** _none_
 
@@ -135,7 +135,7 @@ Newest at the top. One short entry per working session.
   `resolveCapabilities.test.ts` (determinism, §2.4 contrast, SMALL invariants,
   integration clamp, density blend, defaults) and `config.test.ts` (integrity).
   **34 tests passing** (15 prior + 19 new). Build + lint + `tsc --noEmit` clean;
-  grep confirms no db/next/auth imports (pure). Commit `__ENGINE_HASH__`, pushed.
+  grep confirms no db/next/auth imports (pure). Commit `d66e511`, pushed.
 - **Next up:** Onboarding wizard (Context Profile from ≤5 selections), then Phase 1.
 - **Notes:** Engine reuses the Prisma `Role` **type** only. `Capabilities` adds
   `sso`/`scim` beyond the §2.2 sketch. The §2.4 acceptance criterion is proven by
