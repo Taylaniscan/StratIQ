@@ -17,7 +17,7 @@
 - **Next up:** **M1 Category Workspace & Governance** — workspace screens (overview,
   taxonomy, team/RACI, version control) reading `Capabilities`; first real
   feature module of the Spine.
-- **Last working commit:** `__ONBOARDING_HASH__` — onboarding wizard + tenant provisioning.
+- **Last working commit:** `9e7a9fc` — onboarding wizard + tenant provisioning.
 - **Live URL (Vercel):** _not deployed yet_
 - **Blockers:** _none_
 
@@ -142,7 +142,7 @@ Newest at the top. One short entry per working session.
   real page) and render the resolved capabilities; guards onboarding↔dashboard.
   **42 tests passing** (34 prior + 8 new: provisioning incl. idempotency +
   forTenant isolation, and Zod schema). build + lint + tsc clean; dev smoke shows
-  guards redirecting. Commit `__ONBOARDING_HASH__`, pushed. **Phase 0 complete.**
+  guards redirecting. Commit `9e7a9fc`, pushed. **Phase 0 complete.**
 - **Next up:** Phase 1 — M1 Category Workspace & Governance.
 - **Notes:** Auth'd happy-path (signup→/onboarding→create→/dashboard) verified by
   integration tests; UI verified manually by the user. Email confirmation is OFF so
