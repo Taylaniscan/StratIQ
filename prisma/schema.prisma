@@ -43,6 +43,15 @@ enum Role {
   SUPPLIER_USER
 }
 
+enum WorkspaceStatus {
+  DRAFT
+  REVIEW
+  APPROVED
+  IN_EXECUTION
+  MONITORING
+  REFRESH
+}
+
 // ---------------------------------------------------------------------------
 // Identity & tenancy (foundation)
 // ---------------------------------------------------------------------------
@@ -55,6 +64,7 @@ model Tenant {
 
   users       User[]
   memberships Membership[]
+  workspaces  Workspace[]
 
   @@map("tenants")
 }
@@ -88,4 +98,28 @@ model Membership {
   @@unique([tenantId, userId])
   @@index([tenantId])
   @@map("memberships")
+}
+
+// ---------------------------------------------------------------------------
+// Category workspaces
+// ---------------------------------------------------------------------------
+
+model Workspace {
+  id         String          @id @default(cuid())
+  tenantId   String          @map("tenant_id")
+  name       String
+  taxonomyL1 String          @map("taxonomy_l1")
+  taxonomyL2 String?         @map("taxonomy_l2")
+  taxonomyL3 String?         @map("taxonomy_l3")
+  // ContextProfile (drives the Adaptivity Engine). Stored as JSON; validated by
+  // lib/adaptivity/profile.ts before persistence.
+  profile    Json
+  status     WorkspaceStatus @default(DRAFT)
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("workspaces")
 }

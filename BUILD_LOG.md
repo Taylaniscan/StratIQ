@@ -13,11 +13,11 @@
 
 ## 🔭 Current status
 
-- **Phase:** `Phase 0 — Foundation` (in progress)
-- **Next up:** **Onboarding wizard** — produce a Context Profile from ≤5 selections
-  (consumes `withProfileDefaults` + `resolveCapabilities`), persist on
-  `Workspace.profile`. Last Phase 0 item before Phase 1 (the Spine).
-- **Last working commit:** `d66e511` — Adaptivity Engine (resolver + config + tests).
+- **Phase:** `Phase 0 — Foundation` ✅ **COMPLETE** → starting `Phase 1 — The Spine`
+- **Next up:** **M1 Category Workspace & Governance** — workspace screens (overview,
+  taxonomy, team/RACI, version control) reading `Capabilities`; first real
+  feature module of the Spine.
+- **Last working commit:** `__ONBOARDING_HASH__` — onboarding wizard + tenant provisioning.
 - **Live URL (Vercel):** _not deployed yet_
 - **Blockers:** _none_
 
@@ -55,7 +55,7 @@ Track readiness. Tick when done; note where the credential lives (e.g. `.env.loc
 - [x] Tenant-scoped DB helper + RBAC guard at the API boundary (`forTenant`/`withTenant`, `lib/auth/rbac.ts`)
 - [x] **Adaptivity Engine:** types + all config objects (archetypes, tiers, maturity, data-readiness) in `lib/adaptivity/`
 - [x] `resolveCapabilities()` implemented + **unit tests passing** (pure, deterministic; gates feature work)
-- [ ] Onboarding wizard → produces a Context Profile from ≤5 selections
+- [x] Onboarding wizard → produces a Context Profile from ≤5 selections (provisions tenant + first workspace; live capability preview)
 - [x] **Checkpoint:** two contrasting profiles resolve to visibly different capabilities (`tests/adaptivity/resolveCapabilities.test.ts`)
 
 ### Phase 1 — The Spine (the demo-able MVP)
@@ -108,6 +108,10 @@ Record every meaningful choice so it never gets re-litigated mid-build.
 | 2026-06-13 | Adaptivity dimension→capability mapping: tier→modules/roles/approval/SSO; archetype→fields/sources/levers/KPIs; maturity→frameworks/options/evidence; dataReadiness→integrationMode | Directly from CLAUDE.md §2.1 control table |
 | 2026-06-13 | Blends: `integrationMode` clamped to tier cap (SMALL/MID=FILES, ENT=CONNECTED); `uiDensity` FOUNDATIONAL→GUIDED/ADVANCED→EXPERT else tier default; terminology = tier base + archetype item-noun overlay | Resolve overlaps between dimensions deterministically |
 | 2026-06-13 | `Capabilities` adds `sso`/`scim` beyond §2.2 sketch; label maps are `Record<Id,string>` (compile-time completeness); engine imports only Prisma `Role` **type** | Clean SMALL-no-SSO gate; TS enforces every enum value has a label; keeps engine pure |
+| 2026-06-13 | Onboarding creates Tenant + first Workspace; `ContextProfile` stored as `Workspace.profile` JSON (only `OrgTier` is a Prisma enum) | §2.1/§6.1: profile at tenant onboarding; archetype/maturity/dataReadiness stay JSON until a reason to enum them |
+| 2026-06-13 | Tenant provisioning runs via the **admin client** in one transaction (idempotent on `authUserId`) | Bootstrap must create a Tenant before any tenant context exists — RLS app role can't; only place that creates a Tenant |
+| 2026-06-13 | `db:setup-rls` no longer ALTERs an existing role (CREATE-only) | Supabase `postgres` can CREATE roles but not ALTER their attributes/password; keeps the script idempotent. Rotate password by drop+recreate |
+| 2026-06-13 | DB-based redirects in page server components, not `proxy.ts`; added `zod` for the server-boundary schema | Proxy runs on the edge (no Prisma); wizard uses tap-cards + live `resolveCapabilities` preview, RHF deferred |
 
 ---
 
@@ -123,6 +127,26 @@ Record every meaningful choice so it never gets re-litigated mid-build.
 ## 🗒️ Session log
 
 Newest at the top. One short entry per working session.
+
+### Session 5 — 2026-06-13
+- **Goal:** Onboarding wizard (Context Profile from ≤5 selections) — the Phase 0
+  capstone wiring auth + DB/RLS + the Adaptivity Engine.
+- **Done:** Added `Workspace` model + `WorkspaceStatus` enum (migration
+  `add_workspace`); re-ran `db:setup-rls` (RLS now on `workspaces`; fixed the
+  script to not ALTER an existing role). Added `zod`. `lib/adaptivity/profile.ts`
+  (Zod schemas, server boundary). `lib/domain/onboarding.ts`
+  `provisionTenantWorkspace` (admin-client tx: Tenant→User→Membership(OWNER)→
+  Workspace; idempotent). `app/onboarding/` page guard + `OnboardingWizard`
+  (tap-card stepper with **live `resolveCapabilities` preview**) + `completeOnboarding`
+  server action. Dashboard upgraded to load the workspace via `forTenant` (RLS in a
+  real page) and render the resolved capabilities; guards onboarding↔dashboard.
+  **42 tests passing** (34 prior + 8 new: provisioning incl. idempotency +
+  forTenant isolation, and Zod schema). build + lint + tsc clean; dev smoke shows
+  guards redirecting. Commit `__ONBOARDING_HASH__`, pushed. **Phase 0 complete.**
+- **Next up:** Phase 1 — M1 Category Workspace & Governance.
+- **Notes:** Auth'd happy-path (signup→/onboarding→create→/dashboard) verified by
+  integration tests; UI verified manually by the user. Email confirmation is OFF so
+  signup lands a session immediately.
 
 ### Session 4 — 2026-06-13
 - **Goal:** Build the Adaptivity Engine (CLAUDE.md §2) — the pure resolver that

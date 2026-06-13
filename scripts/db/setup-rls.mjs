@@ -47,7 +47,11 @@ async function main() {
   const me = await client.query("select current_user");
   console.log("Connected as:", me.rows[0].current_user);
 
-  // 1. Create or update the dedicated, NON-bypassing app role.
+  // 1. Create the dedicated, NON-bypassing app role on first run only. We do NOT
+  //    ALTER an existing role: Supabase's `postgres` can CREATE roles but not
+  //    ALTER their attributes/password. The script stays idempotent — re-runs are
+  //    for (re)applying grants + RLS to new tables. To rotate the password, drop
+  //    and recreate the role (or use the Supabase dashboard).
   const existing = await client.query("select 1 from pg_roles where rolname = $1", [appRole]);
   if (existing.rowCount === 0) {
     await client.query(
@@ -55,10 +59,7 @@ async function main() {
     );
     console.log(`Created role ${appRole}`);
   } else {
-    await client.query(
-      `ALTER ROLE ${quoteIdent(appRole)} LOGIN NOSUPERUSER NOBYPASSRLS NOCREATEDB NOCREATEROLE PASSWORD ${quoteLiteral(appPassword)}`,
-    );
-    console.log(`Updated role ${appRole}`);
+    console.log(`Role ${appRole} already exists — leaving attributes/password unchanged`);
   }
 
   // 2. Grants on the public schema (current + future objects).
