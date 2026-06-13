@@ -24,8 +24,10 @@ enterprise running thousands of direct-material categories. Build the engine fir
 build features as consumers of it.
 
 **Stack:** Next.js (App Router) + TypeScript · Tailwind + shadcn/ui · Postgres +
-Prisma · Supabase (auth/storage) · Postgres RLS for tenant isolation · Anthropic
-SDK (server-side, evidence-grounded). One repo. Real AI calls.
+Prisma · Supabase (auth/storage) · Postgres RLS for tenant isolation. **AI is
+real from day one, behind a provider interface: build on the free Google Gemini
+tier, then flip one env var to real Anthropic Claude when ready.** Evidence-grounded
+(see §10). One repo.
 
 **Build order:** Foundation → Adaptivity Engine → Spine (workspace → data →
 positioning → options → export) → Execution → Value loop. See §13.
@@ -197,7 +199,7 @@ export const ORG_TIERS: Record<OrgTier, OrgTierConfig> = {
 | ORM | **Prisma** | Typed schema, migrations, great agent support |
 | Auth + storage | **Supabase** (Auth, Storage, Postgres) | Auth/SSO/file storage out of the box; reduces build surface |
 | Tenant isolation | **`tenant_id` on every row + Postgres RLS** | Hard multi-tenant guarantee |
-| AI | **Anthropic SDK, server-side only** | Real calls; evidence-grounded (see §10) |
+| AI | **Provider interface with two real backends: Gemini (build) + Anthropic (launch)** | Free Google Gemini tier during the build; switch to real Claude via one env flag; both server-side, evidence-grounded (see §10) |
 | Background jobs | **Inngest** (or Vercel Cron for MVP) | Monitoring & refresh agents |
 | File parsing | **SheetJS (xlsx)** + **papaparse** server-side | Spend/CSV ingestion |
 | Validation | **Zod** everywhere (API boundary + forms) | One schema, reused |
@@ -442,7 +444,59 @@ The PDR's biggest risk is feeling like enterprise software. Counter it:
 
 ---
 
-## 10. AI implementation (real Anthropic calls)
+## 10. AI implementation (provider-abstracted: Gemini now, Anthropic later)
+
+### 10.0 Provider abstraction — BUILD THIS FIRST, before any agent
+
+**AI is real from day one.** During the build it runs on the **free Google Gemini
+tier**; switching to **real Anthropic Claude** later is a one-line env change with
+no feature code touched. Both are real models behind a single interface.
+
+```ts
+// lib/ai/provider.ts
+export interface AIProvider {
+  research(input: ResearchInput): Promise<ResearchResult>;
+  extract(input: ExtractInput): Promise<ExtractResult>;
+  synthesize(input: SynthInput): Promise<SynthResult>;
+  monitor(input: MonitorInput): Promise<MonitorResult>;
+  negotiate(input: NegotiateInput): Promise<NegotiateResult>;
+}
+
+// Chosen ONCE from env; the rest of the app only ever sees `AIProvider`.
+export function getAIProvider(): AIProvider {
+  switch (process.env.AI_PROVIDER) {
+    case 'anthropic': return new AnthropicProvider(); // real Claude; launch target
+    case 'gemini':
+    default:          return new GeminiProvider();    // free tier; the build default
+  }
+}
+```
+
+**Hard rules:**
+- **No file calls a model SDK directly.** Everything goes through `getAIProvider()`.
+  One import surface, one swap point.
+- **Identical output shape** from both providers (same TypeScript types, same
+  Zod-validated JSON). The UI, loading states, error handling, and the
+  approve/edit/reject flow must be impossible to tell apart across providers.
+- **Both providers obey the evidence-grounding contract** (§10.2): cite only
+  evidence card IDs that exist; the server validates and strips unknown IDs.
+- **Default is `gemini`.** If `AI_PROVIDER` is unset, use Gemini. If the selected
+  provider's key is missing, fail with a clear, friendly error — never crash.
+- **Gemini integration:** use Google's SDK (`@google/genai`) or its
+  OpenAI-compatible endpoint; model from `GEMINI_MODEL` (default
+  `gemini-2.5-flash`). **Anthropic integration:** use `@anthropic-ai/sdk`; model
+  from `ANTHROPIC_MODEL`. Tool-use / structured output on both.
+
+**Switching to Claude later = three steps, no code change:** set
+`AI_PROVIDER=anthropic`, add `ANTHROPIC_API_KEY`, load credits (auto-reload OFF +
+a monthly spend limit). Because Gemini and Claude differ in tone, length, and
+edge-case behavior, **budget one prompt-tuning pass on Claude before launch** —
+prompts tuned on Gemini will not behave identically on Claude.
+
+> **Privacy note:** free Gemini-tier prompts may be used by Google to improve
+> models. Only ever send the fake **seed/demo data** through it. Real tenant data
+> must wait until you're on a paid, data-protected provider (Anthropic at launch,
+> or Gemini paid tier).
 
 ### 10.1 Agents
 | Agent | Job | Guardrail |
@@ -465,12 +519,14 @@ The PDR's biggest risk is feeling like enterprise software. Counter it:
    provenance.
 
 ### 10.3 Mechanics
-- Server-side only; key in env. Stream responses where UX benefits (synthesis).
+- All AI flows through `getAIProvider()` (§10.0); server-side only; key in env.
+  Stream responses where UX benefits (synthesis).
 - Use tool-use / structured output (JSON via Zod-validated schema) for anything
-  that becomes structured data (options, extractions, scorecards).
+  that becomes structured data (options, extractions, scorecards). Both providers
+  return the same validated shapes.
 - Anonymization step before external calls where `policy_exception_reason`/tenant
   policy requires.
-- Log model version for governance (NFR model governance).
+- Log the provider + model version used for governance (NFR model governance).
 
 ---
 
@@ -502,7 +558,10 @@ governance (version log, labeling, opt-out) · WCAG-conscious patterns.
 2. Tenant + Membership + RLS; tenant-scoped DB helper; RBAC guard.
 3. **Adaptivity Engine**: types, all config objects, `resolveCapabilities`,
    unit tests. *No feature work until this is green.*
-4. Onboarding wizard that produces a Context Profile from ≤5 selections.
+4. **AI provider abstraction** (§10.0): `AIProvider` interface, a working
+   evidence-grounded `GeminiProvider` (the active default, free tier), and a
+   dormant `AnthropicProvider`. Build everything against Gemini — no cost.
+5. Onboarding wizard that produces a Context Profile from ≤5 selections.
 
 **Phase 1 — The Spine (demonstrable end-to-end loop):**
 M1 Workspace → M3 requirements (archetype-shaped) → M4 intelligence + EvidenceCards

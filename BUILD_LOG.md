@@ -13,9 +13,9 @@
 
 ## 🔭 Current status
 
-- **Phase:** `Phase 0 — Foundation` (not started)
-- **Next up:** Stage 1 setup — create accounts, install Claude Code, scaffold repo.
-- **Last working commit:** _none yet_
+- **Phase:** `Phase 0 — Foundation` (in progress)
+- **Next up:** Prisma + Postgres connected; first migration runs.
+- **Last working commit:** `__SCAFFOLD_HASH__` — Phase 0 Task 1 scaffold (Next.js + Tailwind + shadcn).
 - **Live URL (Vercel):** _not deployed yet_
 - **Blockers:** _none_
 
@@ -45,8 +45,8 @@ Track readiness. Tick when done; note where the credential lives (e.g. `.env.loc
 > committed. Each task = one Plan-Mode-then-build cycle, then a git commit.
 
 ### Phase 0 — Foundation (do fully before any feature)
-- [ ] Scaffold Next.js (App Router) + TypeScript + Tailwind + shadcn/ui
-- [ ] App runs locally and is pushed to GitHub
+- [x] Scaffold Next.js (App Router) + TypeScript + Tailwind + shadcn/ui
+- [x] App runs locally and is pushed to GitHub
 - [ ] Prisma + Postgres connected; first migration runs
 - [ ] Supabase auth wired (sign-in, session)
 - [ ] Tenant + Membership models + **Postgres RLS** policies
@@ -92,7 +92,9 @@ Record every meaningful choice so it never gets re-litigated mid-build.
 | _set up_ | Stack: Next.js + TS + shadcn + Postgres/Prisma + Supabase + RLS + Anthropic SDK | Best Claude Code support, friendly UI, fast multi-tenant path |
 | _set up_ | First target: multi-tenant SaaS, real Anthropic API calls | Per product owner |
 | _set up_ | Savings taxonomy: Identified → Validated → Realized → Sustained (+`avoided` flag) | Finance system-of-record default (confirm with finance) |
-| | _add decisions as you make them_ | |
+| 2026-06-13 | Package manager: **npm**; no `src/` dir (app/lib/components at repo root per §4) | Node 20/npm present; matches CLAUDE.md §4 structure |
+| 2026-06-13 | shadcn/ui installed via the **Base UI** registry (Tailwind v4); `Button` uses `render` prop, not `asChild` | Current shadcn default; note for all future components |
+| 2026-06-13 | Renamed `env.local` → `.env.local`; added committed `.env.example` | `.env.local` now gitignored + auto-loaded by Next; secrets never tracked |
 
 ---
 
@@ -109,7 +111,24 @@ Record every meaningful choice so it never gets re-litigated mid-build.
 
 Newest at the top. One short entry per working session.
 
-### Session 0 — _date_
+### Session 1 — 2026-06-13
+- **Goal:** Phase 0, Task 1 — project scaffold.
+- **Done:** Scaffolded Next.js 16 (App Router) + TypeScript + Tailwind v4 +
+  shadcn/ui (Base UI registry; `button`, `card`). Laid down the §4 directory
+  skeleton (`lib/{adaptivity,ai,db,auth,domain}`, `components/domain`, `prisma`,
+  `tests`, route groups `app/(auth)`/`app/(app)`). Replaced the landing page with
+  a branded StratIQ placeholder (shadcn Card + Button) and fixed the `--font-sans`
+  wiring in `layout.tsx`. Renamed `env.local` → `.env.local`, added `.env.example`,
+  ignored `next-env.d.ts`. `npm run build` clean; dev server serves the page (200).
+  Commit `__SCAFFOLD_HASH__`, pushed to `origin/main`.
+- **Next up:** Prisma + Postgres connected; first migration runs.
+- **Notes:** `frontend-design` skill referenced by CLAUDE.md §9 is **not installed**
+  in this environment — used shadcn design tokens directly. shadcn's Base UI
+  `Button` takes a `render` prop instead of Radix `asChild`; remember this for
+  future components. Vitest/Playwright configs deferred to the Adaptivity Engine
+  task where they are first needed.
+
+### Session 0 — _template_
 - **Goal:** _what you set out to do_
 - **Done:** _what actually shipped + commit hash_
 - **Next up:** _the single next task_
