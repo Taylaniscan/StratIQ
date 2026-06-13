@@ -14,9 +14,9 @@
 ## 🔭 Current status
 
 - **Phase:** `Phase 1 — The Spine` (in progress)
-- **Next up:** **M5 Positioning & Segmentation Studio** — Kraljic (always) +
-  maturity-gated frameworks, citing EvidenceCards.
-- **Last working commit:** `d006249` — M4 Intelligence Hub + EvidenceCard system.
+- **Next up:** **M6 Strategy Option Simulator** — ≥2 options + do-nothing baseline,
+  weighted scorecard, NPV, scenarios; enforce the FR-05 evidence publish gate.
+- **Last working commit:** `__M5_HASH__` — M5 Positioning & Segmentation Studio.
 - **Live URL (Vercel):** _not deployed yet_
 - **Blockers:** _none_
 
@@ -62,7 +62,7 @@ Track readiness. Tick when done; note where the credential lives (e.g. `.env.loc
 - [x] M2 Spend & Contract Data Fabric — CSV/Excel import + spend cube (by supplier/BU/site/month) + per-dataset quality + sample loader. _Deferred: AI classification, maverick/contract variance (needs M8), connectors, column-mapping UI._
 - [x] M3 Requirements & Demand Intelligence — dynamic intake form generated from `Capabilities.requirementFields`; persisted as `RequirementArtifact`; server rejects ungated fields. _Deferred: 3–5yr demand time-series, AI extraction._
 - [x] M4 Market & Supplier Intelligence Hub + **EvidenceCard** system — supplier universe, archetype intelligence sources, evidence cards (confidence + derived freshness), evidence-readiness panel. _Deferred: external feeds, AI research agent, publish-blocking enforcement (M6)._
-- [ ] M5 Positioning & Segmentation Studio (Kraljic always; others maturity-gated)
+- [x] M5 Positioning & Segmentation Studio — interactive Kraljic grid (quadrant + posture), maturity-gated frameworks (notes), evidence linking. _Deferred: structured Porter/tiering/health UIs, portfolio segmentation, AI-suggested positioning._
 - [ ] M6 Strategy Option Simulator (≥2 options + baseline + scorecard + NPV)
 - [ ] AI synthesis agent — **evidence-grounded** (cite-by-ID, server-validated)
 - [ ] Export to PDF / PPTX / xlsx
@@ -132,6 +132,23 @@ Record every meaningful choice so it never gets re-litigated mid-build.
 ## 🗒️ Session log
 
 Newest at the top. One short entry per working session.
+
+### Session 10 — 2026-06-13
+- **Goal:** M5 Positioning & Segmentation Studio.
+- **Done:** Schema: `KraljicQuadrant` enum + `Positioning` model (one per
+  workspace; migration `m5_positioning`); RLS applied. Pure `lib/domain/kraljic.ts`
+  (quadrant + posture/label maps, client-safe) and `lib/domain/positioning.ts`
+  (get/save; computes quadrant, rejects ungated frameworks + foreign evidence ids;
+  audited). Route `app/(app)/[workspace]/positioning/` (M5-gated) + action.
+  Components: `KraljicGrid` (2×2 + dot), `PositioningStudio` (client: sliders →
+  live quadrant/posture, rationale, per-framework notes, evidence checklist),
+  `PositioningView` (read-only). Nav M5 → built. Tests: quadrant boundaries,
+  save/compute/reload, ungated-framework + foreign-evidence rejection, isolation —
+  **66 passing**. build + lint + tsc clean. Commit `__M5_HASH__`.
+- **Next up:** M6 Strategy Option Simulator (+ enforce the evidence publish gate).
+- **Notes:** Pure Kraljic helpers extracted to `lib/domain/kraljic.ts` so the
+  client grid can import them without pulling Prisma. Frameworks beyond Kraljic are
+  notes-only for now; structured UIs deferred.
 
 ### Session 9 — 2026-06-13
 - **Goal:** M4 Market & Supplier Intelligence Hub + the EvidenceCard trust spine.

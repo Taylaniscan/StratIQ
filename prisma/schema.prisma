@@ -72,6 +72,13 @@ enum Freshness {
   STALE
 }
 
+enum KraljicQuadrant {
+  LEVERAGE
+  STRATEGIC
+  NON_CRITICAL
+  BOTTLENECK
+}
+
 // ---------------------------------------------------------------------------
 // Identity & tenancy (foundation)
 // ---------------------------------------------------------------------------
@@ -145,6 +152,7 @@ model Workspace {
   spendLines    SpendLine[]
   requirements  RequirementArtifact[]
   evidenceCards EvidenceCard[]
+  positioning   Positioning?
 
   @@index([tenantId])
   @@map("workspaces")
@@ -290,4 +298,28 @@ model EvidenceCard {
   @@index([tenantId])
   @@index([workspaceId])
   @@map("evidence_cards")
+}
+
+// ---------------------------------------------------------------------------
+// Positioning & Segmentation (M5)
+// ---------------------------------------------------------------------------
+
+model Positioning {
+  id                   String          @id @default(cuid())
+  tenantId             String          @map("tenant_id")
+  workspaceId          String          @unique @map("workspace_id")
+  kraljicSupplyRisk    Int             @default(50) @map("kraljic_supply_risk")
+  kraljicBusinessImpact Int            @default(50) @map("kraljic_business_impact")
+  kraljicQuadrant      KraljicQuadrant @default(NON_CRITICAL) @map("kraljic_quadrant")
+  rationale            String?
+  // { [frameworkId]: notes } for non-Kraljic frameworks enabled by maturity.
+  frameworks           Json?
+  evidenceIds          String[]        @map("evidence_ids")
+  createdAt            DateTime        @default(now()) @map("created_at")
+  updatedAt            DateTime        @updatedAt @map("updated_at")
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("positionings")
 }
