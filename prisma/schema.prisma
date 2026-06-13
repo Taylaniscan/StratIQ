@@ -66,6 +66,12 @@ enum DataQuality {
   BLOCKED
 }
 
+enum Freshness {
+  FRESH
+  AGING
+  STALE
+}
+
 // ---------------------------------------------------------------------------
 // Identity & tenancy (foundation)
 // ---------------------------------------------------------------------------
@@ -138,6 +144,7 @@ model Workspace {
   spendDatasets SpendDataset[]
   spendLines    SpendLine[]
   requirements  RequirementArtifact[]
+  evidenceCards EvidenceCard[]
 
   @@index([tenantId])
   @@map("workspaces")
@@ -253,4 +260,34 @@ model RequirementArtifact {
   @@unique([workspaceId, kind])
   @@index([tenantId])
   @@map("requirement_artifacts")
+}
+
+// ---------------------------------------------------------------------------
+// Market & Supplier Intelligence — EvidenceCard trust spine (M4)
+// ---------------------------------------------------------------------------
+
+model EvidenceCard {
+  id                 String     @id @default(cuid())
+  tenantId           String     @map("tenant_id")
+  workspaceId        String     @map("workspace_id")
+  claim              String
+  // EvidenceKind-style tag used to satisfy evidencePolicy.requiredCards.
+  category           String?
+  sourceType         String     @map("source_type")
+  sourceRef          String?    @map("source_ref")
+  sourceUrl          String?    @map("source_url")
+  collectedAt        DateTime   @map("collected_at")
+  refreshedAt        DateTime?  @map("refreshed_at")
+  // Snapshot at write time; the live value is derived from collectedAt + recency.
+  freshness          Freshness  @default(FRESH)
+  confidence         Confidence @default(MEDIUM)
+  triangulationCount Int        @default(1) @map("triangulation_count")
+  ownerId            String     @map("owner_id")
+  createdAt          DateTime   @default(now()) @map("created_at")
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([workspaceId])
+  @@map("evidence_cards")
 }

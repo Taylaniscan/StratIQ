@@ -14,9 +14,9 @@
 ## 🔭 Current status
 
 - **Phase:** `Phase 1 — The Spine` (in progress)
-- **Next up:** **M4 Market & Supplier Intelligence Hub + EvidenceCard system** —
-  supplier universe, archetype intelligence sources, and the evidence/trust spine.
-- **Last working commit:** `8a01d5f` — M3 Requirements & Demand Intelligence.
+- **Next up:** **M5 Positioning & Segmentation Studio** — Kraljic (always) +
+  maturity-gated frameworks, citing EvidenceCards.
+- **Last working commit:** `__M4_HASH__` — M4 Intelligence Hub + EvidenceCard system.
 - **Live URL (Vercel):** _not deployed yet_
 - **Blockers:** _none_
 
@@ -61,7 +61,7 @@ Track readiness. Tick when done; note where the credential lives (e.g. `.env.loc
 - [x] M1 Category Workspace & Governance — shell (Capabilities-gated nav), overview (taxonomy/objective/status edit), governance (members, approval chain, append-only audit). _Deferred: version snapshots, objective tree, RACI/council editing, invites._
 - [x] M2 Spend & Contract Data Fabric — CSV/Excel import + spend cube (by supplier/BU/site/month) + per-dataset quality + sample loader. _Deferred: AI classification, maverick/contract variance (needs M8), connectors, column-mapping UI._
 - [x] M3 Requirements & Demand Intelligence — dynamic intake form generated from `Capabilities.requirementFields`; persisted as `RequirementArtifact`; server rejects ungated fields. _Deferred: 3–5yr demand time-series, AI extraction._
-- [ ] M4 Market & Supplier Intelligence Hub + **EvidenceCard** system
+- [x] M4 Market & Supplier Intelligence Hub + **EvidenceCard** system — supplier universe, archetype intelligence sources, evidence cards (confidence + derived freshness), evidence-readiness panel. _Deferred: external feeds, AI research agent, publish-blocking enforcement (M6)._
 - [ ] M5 Positioning & Segmentation Studio (Kraljic always; others maturity-gated)
 - [ ] M6 Strategy Option Simulator (≥2 options + baseline + scorecard + NPV)
 - [ ] AI synthesis agent — **evidence-grounded** (cite-by-ID, server-validated)
@@ -132,6 +132,23 @@ Record every meaningful choice so it never gets re-litigated mid-build.
 ## 🗒️ Session log
 
 Newest at the top. One short entry per working session.
+
+### Session 9 — 2026-06-13
+- **Goal:** M4 Market & Supplier Intelligence Hub + the EvidenceCard trust spine.
+- **Done:** Schema: `Freshness` enum + `EvidenceCard` (migration `m4_evidence`);
+  RLS applied. `lib/domain/evidence.ts` (`computeFreshness` derived from recency,
+  `confidenceRank`, `createEvidenceCard` (audited), `listEvidenceCards`, pure
+  `evidenceReadiness` vs `evidencePolicy.requiredCards`) and `lib/domain/suppliers.ts`
+  (list/add, audited). Route `app/(app)/[workspace]/intelligence/` (M4-gated) +
+  actions (`addEvidence`, `addSupplierAction`, Zod-validated, RBAC). Components in
+  `components/intelligence/` (EvidenceList with confidence colors + freshness,
+  AddEvidenceForm, SupplierUniverse, IntelligenceSources, EvidenceReadiness). Nav
+  M4 → built. Tests: freshness boundaries, readiness logic, evidence + supplier
+  tenant isolation — **61 passing**. build + lint + tsc clean. Commit `__M4_HASH__`.
+- **Next up:** M5 Positioning & Segmentation Studio.
+- **Notes:** Freshness is derived on read (snapshot column also set at write).
+  `evidenceReadiness` is the basis for the FR-05 publish-block gate, enforced when
+  M6 lands. Intelligence sources are shown from the engine; real feeds deferred.
 
 ### Session 8 — 2026-06-13
 - **Goal:** M3 Requirements & Demand Intelligence — archetype-shaped intake.
