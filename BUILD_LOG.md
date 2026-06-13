@@ -16,7 +16,7 @@
 - **Phase:** `Phase 0 — Foundation` (in progress)
 - **Next up:** Postgres RLS policies + tenant-scoped DB helper + RBAC guard
   (Tenant/User/Membership models already migrated), then the Adaptivity Engine.
-- **Last working commit:** `__FOUNDATION_HASH__` — Prisma + Supabase auth wired.
+- **Last working commit:** `32f8ca4` — Prisma + Supabase auth wired.
 - **Live URL (Vercel):** _not deployed yet_
 - **Blockers:** _none_
 
@@ -129,7 +129,7 @@ Newest at the top. One short entry per working session.
   sign-in/sign-up server actions), protected `/dashboard` (shows user, sign out).
   `.env.local` DB password percent-encoded to fix P1013. Build + lint clean; dev
   smoke: `/` 200, `/login` 200, `/dashboard` → 307 → `/login`. Commit
-  `__FOUNDATION_HASH__`, pushed to `origin/main`.
+  `32f8ca4`, pushed to `origin/main`.
 - **Next up:** Postgres RLS policies + tenant-scoped DB helper + RBAC guard, then
   the Adaptivity Engine.
 - **Notes:** Full sign-in round-trip depends on the Supabase project's
