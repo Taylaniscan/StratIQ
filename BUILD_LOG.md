@@ -16,7 +16,7 @@
 - **Phase:** `Phase 1 — The Spine` (in progress)
 - **Next up:** **M5 Positioning & Segmentation Studio** — Kraljic (always) +
   maturity-gated frameworks, citing EvidenceCards.
-- **Last working commit:** `__M4_HASH__` — M4 Intelligence Hub + EvidenceCard system.
+- **Last working commit:** `d006249` — M4 Intelligence Hub + EvidenceCard system.
 - **Live URL (Vercel):** _not deployed yet_
 - **Blockers:** _none_
 
@@ -144,7 +144,7 @@ Newest at the top. One short entry per working session.
   `components/intelligence/` (EvidenceList with confidence colors + freshness,
   AddEvidenceForm, SupplierUniverse, IntelligenceSources, EvidenceReadiness). Nav
   M4 → built. Tests: freshness boundaries, readiness logic, evidence + supplier
-  tenant isolation — **61 passing**. build + lint + tsc clean. Commit `__M4_HASH__`.
+  tenant isolation — **61 passing**. build + lint + tsc clean. Commit `d006249`.
 - **Next up:** M5 Positioning & Segmentation Studio.
 - **Notes:** Freshness is derived on read (snapshot column also set at write).
   `evidenceReadiness` is the basis for the FR-05 publish-block gate, enforced when
