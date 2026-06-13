@@ -153,6 +153,8 @@ model Workspace {
   requirements  RequirementArtifact[]
   evidenceCards EvidenceCard[]
   positioning   Positioning?
+  options       StrategyOption[]
+  criteria      DecisionCriterion[]
 
   @@index([tenantId])
   @@map("workspaces")
@@ -322,4 +324,67 @@ model Positioning {
 
   @@index([tenantId])
   @@map("positionings")
+}
+
+// ---------------------------------------------------------------------------
+// Strategy Option Simulator (M6)
+// ---------------------------------------------------------------------------
+
+model StrategyOption {
+  id                  String   @id @default(cuid())
+  tenantId            String   @map("tenant_id")
+  workspaceId         String   @map("workspace_id")
+  label               String
+  isBaseline          Boolean  @default(false) @map("is_baseline")
+  isSelected          Boolean  @default(false) @map("is_selected")
+  leversApplied       String[] @map("levers_applied")
+  narrative           String?
+  implCostMinor       BigInt   @default(0) @map("impl_cost_minor")
+  savingsBaseMinor    BigInt   @default(0) @map("savings_base_minor")
+  savingsUpsideMinor  BigInt   @default(0) @map("savings_upside_minor")
+  savingsDownsideMinor BigInt  @default(0) @map("savings_downside_minor")
+  horizonYears        Int      @default(3) @map("horizon_years")
+  riskScore           Float?   @map("risk_score")
+  npvMinor            BigInt?  @map("npv_minor")
+  position            Int      @default(0)
+  createdAt           DateTime @default(now()) @map("created_at")
+
+  workspace Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  scores    OptionScore[]
+
+  @@index([tenantId])
+  @@index([workspaceId])
+  @@map("strategy_options")
+}
+
+model DecisionCriterion {
+  id          String   @id @default(cuid())
+  tenantId    String   @map("tenant_id")
+  workspaceId String   @map("workspace_id")
+  name        String
+  weight      Float    @default(1)
+  position    Int      @default(0)
+
+  workspace Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  scores    OptionScore[]
+
+  @@index([tenantId])
+  @@index([workspaceId])
+  @@map("decision_criteria")
+}
+
+model OptionScore {
+  id          String  @id @default(cuid())
+  tenantId    String  @map("tenant_id")
+  optionId    String  @map("option_id")
+  criterionId String  @map("criterion_id")
+  score       Float   @default(0)
+  rationale   String?
+
+  option    StrategyOption    @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  criterion DecisionCriterion @relation(fields: [criterionId], references: [id], onDelete: Cascade)
+
+  @@unique([optionId, criterionId])
+  @@index([tenantId])
+  @@map("option_scores")
 }

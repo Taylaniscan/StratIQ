@@ -14,9 +14,10 @@
 ## 🔭 Current status
 
 - **Phase:** `Phase 1 — The Spine` (in progress)
-- **Next up:** **M6 Strategy Option Simulator** — ≥2 options + do-nothing baseline,
-  weighted scorecard, NPV, scenarios; enforce the FR-05 evidence publish gate.
-- **Last working commit:** `5ad382c` — M5 Positioning & Segmentation Studio.
+- **Next up:** **AI synthesis agent** — evidence-grounded (cite-by-ID,
+  server-validated) drafting of positioning/option narratives via the Gemini
+  provider; build the provider abstraction (§10.0) first.
+- **Last working commit:** `__M6_HASH__` — M6 Strategy Option Simulator + publish gate.
 - **Live URL (Vercel):** _not deployed yet_
 - **Blockers:** _none_
 
@@ -63,7 +64,7 @@ Track readiness. Tick when done; note where the credential lives (e.g. `.env.loc
 - [x] M3 Requirements & Demand Intelligence — dynamic intake form generated from `Capabilities.requirementFields`; persisted as `RequirementArtifact`; server rejects ungated fields. _Deferred: 3–5yr demand time-series, AI extraction._
 - [x] M4 Market & Supplier Intelligence Hub + **EvidenceCard** system — supplier universe, archetype intelligence sources, evidence cards (confidence + derived freshness), evidence-readiness panel. _Deferred: external feeds, AI research agent, publish-blocking enforcement (M6)._
 - [x] M5 Positioning & Segmentation Studio — interactive Kraljic grid (quadrant + posture), maturity-gated frameworks (notes), evidence linking. _Deferred: structured Porter/tiering/health UIs, portfolio segmentation, AI-suggested positioning._
-- [ ] M6 Strategy Option Simulator (≥2 options + baseline + scorecard + NPV)
+- [x] M6 Strategy Option Simulator — criteria + options + baseline, live weighted scorecard + NPV (scenario depth by maturity), option select, **FR-05 publish gate** (evidence + option policy, with audited override). _Deferred: BusinessCase + AI economics, Monte-Carlo NPV, full approval workflow._
 - [ ] AI synthesis agent — **evidence-grounded** (cite-by-ID, server-validated)
 - [ ] Export to PDF / PPTX / xlsx
 - [ ] Seed data: "Northwind Foods" (SMALL/INDIRECT_SERVICE) + "Atlas Industrial" (ENTERPRISE/DIRECT_MATERIAL)
@@ -132,6 +133,26 @@ Record every meaningful choice so it never gets re-litigated mid-build.
 ## 🗒️ Session log
 
 Newest at the top. One short entry per working session.
+
+### Session 11 — 2026-06-13
+- **Goal:** M6 Strategy Option Simulator — the Spine keystone + the FR-05 publish gate.
+- **Done:** Schema: `StrategyOption`, `DecisionCriterion`, `OptionScore` (migration
+  `m6_options`); RLS applied. Pure `lib/domain/finance.ts` (`computeNpvMinor`,
+  `weightedScore`, `expectedSavingsMinor` — client-safe), `lib/domain/publish.ts`
+  (`publishReadiness` reusing `evidenceReadiness`), `lib/domain/options.ts`
+  (`getSimulation`, bulk `saveSimulation` (replace + validate levers/baseline +
+  NPV snapshot + audit), `setWorkspaceStatus`). Route
+  `app/(app)/[workspace]/options/` (M6-gated) + actions (`saveSimulationAction`,
+  `requestReviewAction` — gate with audited override). Components: `OptionSimulator`
+  (criteria + options + per-criterion scores, **live** weighted score + NPV),
+  `PublishPanel` (blockers + request review + override), `OptionsView`. Nav M6 →
+  built. Tests: finance math, publishReadiness, saveSimulation persist/reject/
+  isolation — **78 passing**. build + lint + tsc clean. Commit `__M6_HASH__`.
+- **Next up:** AI synthesis agent (build §10.0 provider abstraction on Gemini first).
+- **Notes:** The analytical Spine (M1–M6) is complete. Publish gate moves a DRAFT
+  workspace to REVIEW only when evidence + options pass, or with a documented,
+  audited override. Money parsed via `parseAmountToMinor`; NPV uses float
+  discounting then back to bigint (documented).
 
 ### Session 10 — 2026-06-13
 - **Goal:** M5 Positioning & Segmentation Studio.
