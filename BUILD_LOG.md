@@ -16,7 +16,7 @@
 - **Phase:** `Phase 1 — The Spine` (in progress)
 - **Next up:** **M6 Strategy Option Simulator** — ≥2 options + do-nothing baseline,
   weighted scorecard, NPV, scenarios; enforce the FR-05 evidence publish gate.
-- **Last working commit:** `__M5_HASH__` — M5 Positioning & Segmentation Studio.
+- **Last working commit:** `5ad382c` — M5 Positioning & Segmentation Studio.
 - **Live URL (Vercel):** _not deployed yet_
 - **Blockers:** _none_
 
@@ -144,7 +144,7 @@ Newest at the top. One short entry per working session.
   live quadrant/posture, rationale, per-framework notes, evidence checklist),
   `PositioningView` (read-only). Nav M5 → built. Tests: quadrant boundaries,
   save/compute/reload, ungated-framework + foreign-evidence rejection, isolation —
-  **66 passing**. build + lint + tsc clean. Commit `__M5_HASH__`.
+  **66 passing**. build + lint + tsc clean. Commit `5ad382c`.
 - **Next up:** M6 Strategy Option Simulator (+ enforce the evidence publish gate).
 - **Notes:** Pure Kraljic helpers extracted to `lib/domain/kraljic.ts` so the
   client grid can import them without pulling Prisma. Frameworks beyond Kraljic are
