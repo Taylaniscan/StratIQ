@@ -15,7 +15,7 @@
 
 - **Phase:** `Phase 0 — Foundation` (in progress)
 - **Next up:** Prisma + Postgres connected; first migration runs.
-- **Last working commit:** `__SCAFFOLD_HASH__` — Phase 0 Task 1 scaffold (Next.js + Tailwind + shadcn).
+- **Last working commit:** `a7a88ec` — Phase 0 Task 1 scaffold (Next.js + Tailwind + shadcn).
 - **Live URL (Vercel):** _not deployed yet_
 - **Blockers:** _none_
 
@@ -120,7 +120,7 @@ Newest at the top. One short entry per working session.
   a branded StratIQ placeholder (shadcn Card + Button) and fixed the `--font-sans`
   wiring in `layout.tsx`. Renamed `env.local` → `.env.local`, added `.env.example`,
   ignored `next-env.d.ts`. `npm run build` clean; dev server serves the page (200).
-  Commit `__SCAFFOLD_HASH__`, pushed to `origin/main`.
+  Commit `a7a88ec`, pushed to `origin/main`.
 - **Next up:** Prisma + Postgres connected; first migration runs.
 - **Notes:** `frontend-design` skill referenced by CLAUDE.md §9 is **not installed**
   in this environment — used shadcn design tokens directly. shadcn's Base UI
