@@ -16,7 +16,7 @@
 - **Phase:** `Phase 1 — The Spine` (in progress)
 - **Next up:** **M2 Spend & Contract Data Fabric** — CSV/Excel spend import + spend
   cube (the `data` tab in the workspace shell).
-- **Last working commit:** `__M1_HASH__` — M1 Category Workspace & Governance.
+- **Last working commit:** `e34bd6a` — M1 Category Workspace & Governance.
 - **Live URL (Vercel):** _not deployed yet_
 - **Blockers:** _none_
 
@@ -144,7 +144,7 @@ Newest at the top. One short entry per working session.
   `components/workspace/` + shadcn badge/textarea/select/separator. Tests:
   `tests/workspace.test.ts` (tenant isolation, update+audit, append-only reject) —
   **46 passing**. build + lint + tsc clean.
-  Commit `__M1_HASH__`, pushed.
+  Commit `e34bd6a`, pushed.
 - **Next up:** M2 Spend & Contract Data Fabric (CSV/Excel import + spend cube).
 - **Notes:** Workspace addressed by id in the URL; cross-tenant → `notFound` via
   RLS. Other modules (M2–M12) show as disabled "Soon" in the nav until built.
