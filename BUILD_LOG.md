@@ -17,7 +17,7 @@
 - **Next up:** **AI synthesis agent** — evidence-grounded (cite-by-ID,
   server-validated) drafting of positioning/option narratives via the Gemini
   provider; build the provider abstraction (§10.0) first.
-- **Last working commit:** `__M6_HASH__` — M6 Strategy Option Simulator + publish gate.
+- **Last working commit:** `c79c4a9` — M6 Strategy Option Simulator + publish gate.
 - **Live URL (Vercel):** _not deployed yet_
 - **Blockers:** _none_
 
@@ -147,7 +147,7 @@ Newest at the top. One short entry per working session.
   (criteria + options + per-criterion scores, **live** weighted score + NPV),
   `PublishPanel` (blockers + request review + override), `OptionsView`. Nav M6 →
   built. Tests: finance math, publishReadiness, saveSimulation persist/reject/
-  isolation — **78 passing**. build + lint + tsc clean. Commit `__M6_HASH__`.
+  isolation — **78 passing**. build + lint + tsc clean. Commit `c79c4a9`.
 - **Next up:** AI synthesis agent (build §10.0 provider abstraction on Gemini first).
 - **Notes:** The analytical Spine (M1–M6) is complete. Publish gate moves a DRAFT
   workspace to REVIEW only when evidence + options pass, or with a documented,
