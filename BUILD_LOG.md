@@ -14,9 +14,9 @@
 ## 🔭 Current status
 
 - **Phase:** `Phase 1 — The Spine` (in progress)
-- **Next up:** **M3 Requirements & Demand Intelligence** — archetype-shaped intake
-  fields (driven by `Capabilities.requirementFields`) + demand basis.
-- **Last working commit:** `7427bc6` — M2 Spend & Contract Data Fabric.
+- **Next up:** **M4 Market & Supplier Intelligence Hub + EvidenceCard system** —
+  supplier universe, archetype intelligence sources, and the evidence/trust spine.
+- **Last working commit:** `__M3_HASH__` — M3 Requirements & Demand Intelligence.
 - **Live URL (Vercel):** _not deployed yet_
 - **Blockers:** _none_
 
@@ -60,7 +60,7 @@ Track readiness. Tick when done; note where the credential lives (e.g. `.env.loc
 ### Phase 1 — The Spine (the demo-able MVP)
 - [x] M1 Category Workspace & Governance — shell (Capabilities-gated nav), overview (taxonomy/objective/status edit), governance (members, approval chain, append-only audit). _Deferred: version snapshots, objective tree, RACI/council editing, invites._
 - [x] M2 Spend & Contract Data Fabric — CSV/Excel import + spend cube (by supplier/BU/site/month) + per-dataset quality + sample loader. _Deferred: AI classification, maverick/contract variance (needs M8), connectors, column-mapping UI._
-- [ ] M3 Requirements & Demand Intelligence (archetype-shaped intake fields)
+- [x] M3 Requirements & Demand Intelligence — dynamic intake form generated from `Capabilities.requirementFields`; persisted as `RequirementArtifact`; server rejects ungated fields. _Deferred: 3–5yr demand time-series, AI extraction._
 - [ ] M4 Market & Supplier Intelligence Hub + **EvidenceCard** system
 - [ ] M5 Positioning & Segmentation Studio (Kraljic always; others maturity-gated)
 - [ ] M6 Strategy Option Simulator (≥2 options + baseline + scorecard + NPV)
@@ -132,6 +132,24 @@ Record every meaningful choice so it never gets re-litigated mid-build.
 ## 🗒️ Session log
 
 Newest at the top. One short entry per working session.
+
+### Session 8 — 2026-06-13
+- **Goal:** M3 Requirements & Demand Intelligence — archetype-shaped intake.
+- **Done:** Schema: `RequirementArtifact` (one per workspace per kind, `data` JSON
+  keyed by field id; migration `m3_requirements`); RLS applied.
+  `lib/domain/requirements.ts` (get/save; save **rejects ungated field ids** vs the
+  workspace's `Capabilities.requirementFields`, find-then-create/update, audited).
+  Route `app/(app)/[workspace]/requirements/` (M3-gated; editable for
+  `workspace:write`, read-only summary otherwise) + `saveRequirements` action.
+  `components/requirements/RequirementForm` is a generic `FieldSpec[]`-driven
+  renderer (text/textarea/number/currency/date/select/multiselect/boolean) +
+  `RequirementSummary`. Nav M3 → built. Tests: persist/reload, ungated-field
+  rejection, single-artifact update, tenant isolation — **57 passing**. build +
+  lint + tsc clean. Commit `__M3_HASH__`, pushed.
+- **Next up:** M4 Market & Supplier Intelligence Hub + EvidenceCard system.
+- **Notes:** The intake form is generated entirely from the engine — DIRECT_MATERIAL
+  shows BOM/spec/tolerance, INDIRECT_SERVICE shows SOW/SLA/rate-card, same code.
+  Adding intake fields = editing `lib/adaptivity/config/fields.ts` + an archetype.
 
 ### Session 7 — 2026-06-13
 - **Goal:** M2 Spend & Contract Data Fabric — file import + spend cube.

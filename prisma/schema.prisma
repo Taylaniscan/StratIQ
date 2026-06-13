@@ -134,9 +134,10 @@ model Workspace {
   createdAt  DateTime        @default(now())
   updatedAt  DateTime        @updatedAt
 
-  tenant        Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant        Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   spendDatasets SpendDataset[]
   spendLines    SpendLine[]
+  requirements  RequirementArtifact[]
 
   @@index([tenantId])
   @@map("workspaces")
@@ -231,4 +232,25 @@ model SpendLine {
   @@index([workspaceId])
   @@index([datasetId])
   @@map("spend_lines")
+}
+
+// ---------------------------------------------------------------------------
+// Requirements & Demand Intelligence (M3)
+// ---------------------------------------------------------------------------
+
+model RequirementArtifact {
+  id          String   @id @default(cuid())
+  tenantId    String   @map("tenant_id")
+  workspaceId String   @map("workspace_id")
+  // e.g. "INTAKE" — archetype-shaped, keyed by Capabilities.requirementFields.
+  kind        String
+  data        Json
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, kind])
+  @@index([tenantId])
+  @@map("requirement_artifacts")
 }

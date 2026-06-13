@@ -10,7 +10,7 @@ import { MODULE_LABELS, type ModuleId } from "@/lib/adaptivity";
 // Governance items; the rest are Spine modules that light up as they're built.
 const MODULE_NAV: { id: ModuleId; segment: string; built: boolean }[] = [
   { id: "M2", segment: "data", built: true },
-  { id: "M3", segment: "requirements", built: false },
+  { id: "M3", segment: "requirements", built: true },
   { id: "M4", segment: "intelligence", built: false },
   { id: "M5", segment: "positioning", built: false },
   { id: "M6", segment: "options", built: false },
