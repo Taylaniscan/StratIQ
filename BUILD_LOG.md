@@ -16,7 +16,7 @@
 - **Phase:** `Phase 1 — The Spine` (in progress)
 - **Next up:** **Export to PDF / PPTX / xlsx** — exportable category strategy pack
   (overview, positioning, options, evidence, approved AI summary).
-- **Last working commit:** `__AI_HASH__` — AI synthesis agent + provider abstraction.
+- **Last working commit:** `3068e20` — AI synthesis agent + provider abstraction.
 - **Live URL (Vercel):** _not deployed yet_
 - **Blockers:** _none_
 
@@ -147,7 +147,7 @@ Newest at the top. One short entry per working session.
   (generate: workspace:write; approve: strategy:approve||write). Components
   `SynthesisPanel` + `AiBadge`; fixed "AI synthesis" nav item. Tests: grounding,
   provider selection, generate-with-fake-provider (no network) — **85 passing**.
-  build + lint + tsc clean. Commit `__AI_HASH__`.
+  build + lint + tsc clean. Commit `3068e20`.
 - **Next up:** Export to PDF/PPTX/xlsx.
 - **Notes:** First real AI call runs on Gemini free tier — UI warns demo evidence
   only. Anti-hallucination enforced server-side: only valid evidence ids survive,
