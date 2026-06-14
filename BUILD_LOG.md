@@ -14,9 +14,10 @@
 ## 🔭 Current status
 
 - **Phase:** `Phase 1 — The Spine` (in progress)
-- **Next up:** **Export to PDF / PPTX / xlsx** — exportable category strategy pack
-  (overview, positioning, options, evidence, approved AI summary).
-- **Last working commit:** `3068e20` — AI synthesis agent + provider abstraction.
+- **Next up:** **Seed data** — "Northwind Foods" (SMALL/INDIRECT_SERVICE) +
+  "Atlas Industrial" (ENTERPRISE/DIRECT_MATERIAL) demo tenants (spend, suppliers,
+  evidence, requirements, a draft strategy with options + baseline).
+- **Last working commit:** `__EXPORT_HASH__` — Export (PDF/PPTX/xlsx) strategy pack.
 - **Live URL (Vercel):** _not deployed yet_
 - **Blockers:** _none_
 
@@ -65,7 +66,7 @@ Track readiness. Tick when done; note where the credential lives (e.g. `.env.loc
 - [x] M5 Positioning & Segmentation Studio — interactive Kraljic grid (quadrant + posture), maturity-gated frameworks (notes), evidence linking. _Deferred: structured Porter/tiering/health UIs, portfolio segmentation, AI-suggested positioning._
 - [x] M6 Strategy Option Simulator — criteria + options + baseline, live weighted scorecard + NPV (scenario depth by maturity), option select, **FR-05 publish gate** (evidence + option policy, with audited override). _Deferred: BusinessCase + AI economics, Monte-Carlo NPV, full approval workflow._
 - [x] AI synthesis agent — **evidence-grounded** (cite-by-ID, server-validated). Provider abstraction (§10.0: real Gemini + dormant Anthropic); `AiArtifact` provenance; generate/approve/reject/regenerate; only valid citations persisted, unknowns stripped+flagged. _Deferred: research/extract/monitor/negotiate agents, streaming, edit/compare, anonymization, real Anthropic wiring._
-- [ ] Export to PDF / PPTX / xlsx
+- [x] Export to PDF / PPTX / xlsx — shared `buildStrategyPack` → @react-pdf (PDF), pptxgenjs (PPTX), SheetJS (xlsx) via one Node route handler; audited; on the Overview page. _Deferred: embedded charts/images, branded templates, scheduled/emailed exports._
 - [ ] Seed data: "Northwind Foods" (SMALL/INDIRECT_SERVICE) + "Atlas Industrial" (ENTERPRISE/DIRECT_MATERIAL)
 - [ ] Deploy spine to Vercel
 - [ ] **Checkpoint:** full loop works end-to-end for both seed tenants; multi-tenant isolation verified
@@ -132,6 +133,21 @@ Record every meaningful choice so it never gets re-litigated mid-build.
 ## 🗒️ Session log
 
 Newest at the top. One short entry per working session.
+
+### Session 13 — 2026-06-14
+- **Goal:** Export the category strategy pack to PDF / PPTX / xlsx (§11).
+- **Done:** `@react-pdf/renderer` + `pptxgenjs` added (xlsx via existing SheetJS).
+  `lib/domain/strategyPack.ts` `buildStrategyPack` (one tenant-scoped assembler:
+  profile/capabilities, positioning, options+scores, evidence, approved AI summary,
+  spend totals). `lib/export/{xlsx.ts,pdf.tsx,pptx.ts}` generators returning real
+  buffers. One Node route handler `app/(app)/[workspace]/export/route.ts`
+  (`?format=`, `workspace:read`, audited download). `ExportButtons` on Overview.
+  Tests: generator magic bytes (%PDF / PK) + buildStrategyPack assembly +
+  isolation — **90 passing**. build + lint + tsc clean. Commit `__EXPORT_HASH__`.
+- **Next up:** Seed data (Northwind + Atlas), then Vercel deploy + spine checkpoint.
+- **Notes:** AI summary is exported only when APPROVED. PDF via @react-pdf
+  `renderToBuffer` (no headless browser); route is `runtime = "nodejs"`. The full
+  Spine (M1–M6 + AI + export) is now demoable end to end.
 
 ### Session 12 — 2026-06-14
 - **Goal:** AI synthesis agent + the §10.0 provider abstraction (first real AI call).

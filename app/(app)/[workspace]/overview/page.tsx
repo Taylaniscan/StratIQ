@@ -17,6 +17,7 @@ import { can } from "@/lib/auth/rbac";
 import { requireActiveMembership } from "@/lib/auth/session";
 import { getWorkspace } from "@/lib/domain/workspace";
 import { GovernanceEditForm } from "@/components/workspace/GovernanceEditForm";
+import { ExportButtons } from "@/components/export/ExportButtons";
 
 export default async function OverviewPage({
   params,
@@ -112,6 +113,19 @@ export default async function OverviewPage({
               <dd className="text-right">{caps.integrationMode.toLowerCase()}</dd>
             </dl>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Export</CardTitle>
+          <CardDescription>
+            Download the strategy pack (positioning, options, evidence, approved AI
+            summary).
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ExportButtons workspaceId={workspaceId} />
         </CardContent>
       </Card>
     </div>
