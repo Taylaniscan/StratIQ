@@ -17,7 +17,7 @@
 - **Next up:** **Seed data** — "Northwind Foods" (SMALL/INDIRECT_SERVICE) +
   "Atlas Industrial" (ENTERPRISE/DIRECT_MATERIAL) demo tenants (spend, suppliers,
   evidence, requirements, a draft strategy with options + baseline).
-- **Last working commit:** `__EXPORT_HASH__` — Export (PDF/PPTX/xlsx) strategy pack.
+- **Last working commit:** `72b205c` — Export (PDF/PPTX/xlsx) strategy pack.
 - **Live URL (Vercel):** _not deployed yet_
 - **Blockers:** _none_
 
@@ -143,7 +143,7 @@ Newest at the top. One short entry per working session.
   buffers. One Node route handler `app/(app)/[workspace]/export/route.ts`
   (`?format=`, `workspace:read`, audited download). `ExportButtons` on Overview.
   Tests: generator magic bytes (%PDF / PK) + buildStrategyPack assembly +
-  isolation — **90 passing**. build + lint + tsc clean. Commit `__EXPORT_HASH__`.
+  isolation — **90 passing**. build + lint + tsc clean. Commit `72b205c`.
 - **Next up:** Seed data (Northwind + Atlas), then Vercel deploy + spine checkpoint.
 - **Notes:** AI summary is exported only when APPROVED. PDF via @react-pdf
   `renderToBuffer` (no headless browser); route is `runtime = "nodejs"`. The full
