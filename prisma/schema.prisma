@@ -155,6 +155,7 @@ model Workspace {
   positioning   Positioning?
   options       StrategyOption[]
   criteria      DecisionCriterion[]
+  aiArtifacts   AiArtifact[]
 
   @@index([tenantId])
   @@map("workspaces")
@@ -387,4 +388,34 @@ model OptionScore {
   @@unique([optionId, criterionId])
   @@index([tenantId])
   @@map("option_scores")
+}
+
+// ---------------------------------------------------------------------------
+// AI control plane — generated artifacts with provenance (§10, FR-13)
+// ---------------------------------------------------------------------------
+
+enum AiStatus {
+  DRAFT
+  APPROVED
+  REJECTED
+}
+
+model AiArtifact {
+  id          String   @id @default(cuid())
+  tenantId    String   @map("tenant_id")
+  workspaceId String   @map("workspace_id")
+  kind        String // e.g. EXEC_SUMMARY
+  prompt      String
+  model       String // provider:model used
+  output      String
+  evidenceIds String[] @map("evidence_ids")
+  status      AiStatus @default(DRAFT)
+  createdById String   @map("created_by_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([workspaceId])
+  @@map("ai_artifacts")
 }

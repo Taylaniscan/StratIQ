@@ -14,10 +14,9 @@
 ## 🔭 Current status
 
 - **Phase:** `Phase 1 — The Spine` (in progress)
-- **Next up:** **AI synthesis agent** — evidence-grounded (cite-by-ID,
-  server-validated) drafting of positioning/option narratives via the Gemini
-  provider; build the provider abstraction (§10.0) first.
-- **Last working commit:** `c79c4a9` — M6 Strategy Option Simulator + publish gate.
+- **Next up:** **Export to PDF / PPTX / xlsx** — exportable category strategy pack
+  (overview, positioning, options, evidence, approved AI summary).
+- **Last working commit:** `__AI_HASH__` — AI synthesis agent + provider abstraction.
 - **Live URL (Vercel):** _not deployed yet_
 - **Blockers:** _none_
 
@@ -65,7 +64,7 @@ Track readiness. Tick when done; note where the credential lives (e.g. `.env.loc
 - [x] M4 Market & Supplier Intelligence Hub + **EvidenceCard** system — supplier universe, archetype intelligence sources, evidence cards (confidence + derived freshness), evidence-readiness panel. _Deferred: external feeds, AI research agent, publish-blocking enforcement (M6)._
 - [x] M5 Positioning & Segmentation Studio — interactive Kraljic grid (quadrant + posture), maturity-gated frameworks (notes), evidence linking. _Deferred: structured Porter/tiering/health UIs, portfolio segmentation, AI-suggested positioning._
 - [x] M6 Strategy Option Simulator — criteria + options + baseline, live weighted scorecard + NPV (scenario depth by maturity), option select, **FR-05 publish gate** (evidence + option policy, with audited override). _Deferred: BusinessCase + AI economics, Monte-Carlo NPV, full approval workflow._
-- [ ] AI synthesis agent — **evidence-grounded** (cite-by-ID, server-validated)
+- [x] AI synthesis agent — **evidence-grounded** (cite-by-ID, server-validated). Provider abstraction (§10.0: real Gemini + dormant Anthropic); `AiArtifact` provenance; generate/approve/reject/regenerate; only valid citations persisted, unknowns stripped+flagged. _Deferred: research/extract/monitor/negotiate agents, streaming, edit/compare, anonymization, real Anthropic wiring._
 - [ ] Export to PDF / PPTX / xlsx
 - [ ] Seed data: "Northwind Foods" (SMALL/INDIRECT_SERVICE) + "Atlas Industrial" (ENTERPRISE/DIRECT_MATERIAL)
 - [ ] Deploy spine to Vercel
@@ -133,6 +132,27 @@ Record every meaningful choice so it never gets re-litigated mid-build.
 ## 🗒️ Session log
 
 Newest at the top. One short entry per working session.
+
+### Session 12 — 2026-06-14
+- **Goal:** AI synthesis agent + the §10.0 provider abstraction (first real AI call).
+- **Done:** `@google/genai` added. `lib/ai/`: `provider.ts` (`AIProvider`,
+  `getAIProvider` — env-switched, default Gemini, static imports), `gemini.ts`
+  (real, JSON responseSchema, Zod-validated, friendly errors), `anthropic.ts`
+  (dormant — throws AIProviderError), `grounding.ts` (pure `validateCitations` —
+  strips unknown cited ids + sanitizes invented inline tokens). Schema: `AiStatus`
+  enum + `AiArtifact` provenance model (migration `ai_artifacts`); RLS applied.
+  `lib/domain/synthesis.ts` (buildSynthInput from workspace/positioning/options/
+  evidence; `generateSynthesis(...,provider?)` injectable for tests; list/latest/
+  setStatus; audited). Route `app/(app)/[workspace]/synthesis/` + actions
+  (generate: workspace:write; approve: strategy:approve||write). Components
+  `SynthesisPanel` + `AiBadge`; fixed "AI synthesis" nav item. Tests: grounding,
+  provider selection, generate-with-fake-provider (no network) — **85 passing**.
+  build + lint + tsc clean. Commit `__AI_HASH__`.
+- **Next up:** Export to PDF/PPTX/xlsx.
+- **Notes:** First real AI call runs on Gemini free tier — UI warns demo evidence
+  only. Anti-hallucination enforced server-side: only valid evidence ids survive,
+  unknown citations stripped + flagged. Provider swap to Claude is the documented
+  3-step flip. Tests inject a fake provider so no network/cost in CI.
 
 ### Session 11 — 2026-06-13
 - **Goal:** M6 Strategy Option Simulator — the Spine keystone + the FR-05 publish gate.

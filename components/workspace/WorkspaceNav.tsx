@@ -35,6 +35,7 @@ export function WorkspaceNav({
   const builtItems = [
     { href: `${base}/overview`, label: "Overview" },
     { href: `${base}/governance`, label: "Governance" },
+    { href: `${base}/synthesis`, label: "AI synthesis" },
   ];
 
   const moduleItems = MODULE_NAV.filter((m) => enabledModules.includes(m.id));
