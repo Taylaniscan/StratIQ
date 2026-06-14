@@ -14,10 +14,11 @@
 ## 🔭 Current status
 
 - **Phase:** `Phase 1 — The Spine` (in progress)
-- **Next up:** **Seed data** — "Northwind Foods" (SMALL/INDIRECT_SERVICE) +
-  "Atlas Industrial" (ENTERPRISE/DIRECT_MATERIAL) demo tenants (spend, suppliers,
-  evidence, requirements, a draft strategy with options + baseline).
-- **Last working commit:** `72b205c` — Export (PDF/PPTX/xlsx) strategy pack.
+- **Next up:** **Deploy spine to Vercel** + Phase 1 end-to-end checkpoint
+  (full loop works for both seed tenants; multi-tenant isolation verified).
+- **Last working commit:** `__SEED_HASH__` — seed data (Northwind + Atlas demo tenants).
+- **Demo logins:** `northwind@stratiq.demo` (SMALL) · `atlas@stratiq.demo`
+  (ENTERPRISE) — password `SEED_PASSWORD` (default demo-only). Re-seed: `npm run db:seed`.
 - **Live URL (Vercel):** _not deployed yet_
 - **Blockers:** _none_
 
@@ -67,7 +68,7 @@ Track readiness. Tick when done; note where the credential lives (e.g. `.env.loc
 - [x] M6 Strategy Option Simulator — criteria + options + baseline, live weighted scorecard + NPV (scenario depth by maturity), option select, **FR-05 publish gate** (evidence + option policy, with audited override). _Deferred: BusinessCase + AI economics, Monte-Carlo NPV, full approval workflow._
 - [x] AI synthesis agent — **evidence-grounded** (cite-by-ID, server-validated). Provider abstraction (§10.0: real Gemini + dormant Anthropic); `AiArtifact` provenance; generate/approve/reject/regenerate; only valid citations persisted, unknowns stripped+flagged. _Deferred: research/extract/monitor/negotiate agents, streaming, edit/compare, anonymization, real Anthropic wiring._
 - [x] Export to PDF / PPTX / xlsx — shared `buildStrategyPack` → @react-pdf (PDF), pptxgenjs (PPTX), SheetJS (xlsx) via one Node route handler; audited; on the Overview page. _Deferred: embedded charts/images, branded templates, scheduled/emailed exports._
-- [ ] Seed data: "Northwind Foods" (SMALL/INDIRECT_SERVICE) + "Atlas Industrial" (ENTERPRISE/DIRECT_MATERIAL)
+- [x] Seed data: "Northwind Foods" (SMALL/INDIRECT_SERVICE) + "Atlas Industrial" (ENTERPRISE/DIRECT_MATERIAL) — idempotent `npm run db:seed`; each its own Supabase login; fully populated + publish-gate ready.
 - [ ] Deploy spine to Vercel
 - [ ] **Checkpoint:** full loop works end-to-end for both seed tenants; multi-tenant isolation verified
 
@@ -133,6 +134,22 @@ Record every meaningful choice so it never gets re-litigated mid-build.
 ## 🗒️ Session log
 
 Newest at the top. One short entry per working session.
+
+### Session 14 — 2026-06-14
+- **Goal:** Seed two demo tenants (§15) so the app is never empty + adaptivity is
+  visible side by side.
+- **Done:** `prisma/seed.mjs` (`npm run db:seed`, idempotent, admin Prisma via
+  DIRECT_URL + Supabase Auth Admin **REST** API — SDK won't construct under Node).
+  Seeds **Northwind Foods** (SMALL/INDIRECT_SERVICE/FOUNDATIONAL: suppliers,
+  evidence, service requirements, Kraljic + 2 options) and **Atlas Industrial**
+  (ENTERPRISE/DIRECT_MATERIAL/ADVANCED: + spend cube, 5 evidence, material
+  requirements, 3 options). Each gets its own login (User.authUserId is globally
+  unique). Verified idempotent (re-run skips, tenants=1 each) + data counts. build
+  + lint + tsc + 90 tests still green. Commit `__SEED_HASH__`.
+- **Next up:** Vercel deploy + Phase 1 checkpoint.
+- **Notes:** Demo logins northwind@/atlas@stratiq.demo, pw `SEED_PASSWORD`
+  (default demo-only). SMALL has no M2 so Northwind has no spend by design. Both
+  demos are publish-gate ready (evidence + baseline + selected option).
 
 ### Session 13 — 2026-06-14
 - **Goal:** Export the category strategy pack to PDF / PPTX / xlsx (§11).
