@@ -16,7 +16,7 @@
 - **Phase:** `Phase 1 — The Spine` (in progress)
 - **Next up:** **Deploy spine to Vercel** + Phase 1 end-to-end checkpoint
   (full loop works for both seed tenants; multi-tenant isolation verified).
-- **Last working commit:** `__SEED_HASH__` — seed data (Northwind + Atlas demo tenants).
+- **Last working commit:** `39764a0` — seed data (Northwind + Atlas demo tenants).
 - **Demo logins:** `northwind@stratiq.demo` (SMALL) · `atlas@stratiq.demo`
   (ENTERPRISE) — password `SEED_PASSWORD` (default demo-only). Re-seed: `npm run db:seed`.
 - **Live URL (Vercel):** _not deployed yet_
@@ -145,7 +145,7 @@ Newest at the top. One short entry per working session.
   (ENTERPRISE/DIRECT_MATERIAL/ADVANCED: + spend cube, 5 evidence, material
   requirements, 3 options). Each gets its own login (User.authUserId is globally
   unique). Verified idempotent (re-run skips, tenants=1 each) + data counts. build
-  + lint + tsc + 90 tests still green. Commit `__SEED_HASH__`.
+  + lint + tsc + 90 tests still green. Commit `39764a0`.
 - **Next up:** Vercel deploy + Phase 1 checkpoint.
 - **Notes:** Demo logins northwind@/atlas@stratiq.demo, pw `SEED_PASSWORD`
   (default demo-only). SMALL has no M2 so Northwind has no spend by design. Both
